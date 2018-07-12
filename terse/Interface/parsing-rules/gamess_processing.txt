@@ -1,0 +1,89 @@
+# [PROCESSING RULES]
+cctyp=NONE -> cctyp=empty
+last_value(cctyp) -> wf_cctyp
+nonempty(wf_cctyp) -> wftype
+
+hssend=T -> runtyp=freq
+dft=NONE -> dft=empty
+last_value(dft) -> wf_dft
+nonempty(wf_dft) -> wftype
+
+ndftb=2 -> wftype=DFTB2
+ndftb=3 -> wftype=DFTB3
+
+fmo_level=2 -> wftype_fragment='FMO2'
+fmo_level=3 -> wftype_fragment='FMO3'
+
+lcdftb=True -> wftype='LC-DFTB2 (or 3)'
+gbasis=DFTB -> SCF_energy=empty
+dftb_energy -> final_SCF_energy
+nonempty(SCF_energy) -> final_SCF_energy
+last_value(final_SCF_energy) -> scf_e
+
+gbasis=DFTB -> gbasis='minimal basis set'
+last_value(new_step) -> opt_iter
+runtyp=ENERGY -> JobType=sp
+# runtyp=XXX -> JobType=irc
+# runtyp=XXX -> JobType=scan
+# runtyp=XXX -> JobType=td
+# runtyp=freq -> JobType=freq
+runtyp=OPTIMIZE -> JobType=opt
+runtyp=freq -> JobType=freq
+
+last_value(solvent) -> final_solvent
+last_value(solv_model) -> final_solv_model
+last_value(sym) -> final_sym
+last_value(charge) -> final_charge
+last_value(mult) -> final_mult
+scftype=UHF -> open_shell=True
+
+## cityp=NONE -> cityp=''
+## dft=NONE -> dft=''
+
+## cctyp -> wftyp
+## cityp -> wftyp
+## dfttyp -> wftyp
+
+# BASIS
+# Too difficult to complete it here, use Python
+#igauss=0 -> igauss=empty
+#polar=none -> polar=empty
+
+#ndfunc=0 -> ndfunc=''
+#nffunc=0 -> nffunc=empty
+#diffsp=F -> diffsp=empty
+
+#basnam='' -> basnam=empty
+#npfnuc=0 -> npfunc=empty
+#diffs=F -> diffs=empty
+#basnam='' -> basnam=empty
+gbasis -> basis
+    
+# XXX -> scf_done
+# XXX -> freq_temp
+# XXX -> freq_ent
+# XXX -> freq_zpe
+# XXX -> freq_G
+# XXX -> freqs
+# XXX -> frozen # geometrical parameters
+# XXX -> uv # (lambda, fosc pairs)
+# latest(new_step) -> opt_iter
+## max_force -> max_force
+## rms_force -> rms_force
+## max_displacement -> max_displacement
+## rms_displacement -> rms_displacement
+# 
+## geom -> series
+#charges -> atprops
+
+is_geom_ang='True' -> geom_bohr='empty' # if geometry is available in Angstroms, ignore that in bohrs
+nonempty(geom_bohr) -> geom            # if geometry in Bohrs was not ignored, use it
+
+join_unique(JobType) -> final_jobtype
+# aggregate_after(opt_ok) -> opt_process # use new_step as separator for the geometry optimization steps
+aggregate_before(scan) -> scan # use new_step as separator for the geometry optimization steps
+aggregate_before(irc) -> irc # use new_step as separator for the geometry optimization steps
+aggregate_before(new_step) -> opt # use new_step as separator for the geometry optimization steps
+join_unique(new_step) -> steps
+
+# vim: filetype=R

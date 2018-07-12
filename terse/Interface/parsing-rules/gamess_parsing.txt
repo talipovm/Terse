@@ -1,0 +1,257 @@
+# [Parser rules]
+# input data for parse() methods
+# a reasonable syntax coloring scheme is ':setf awk' in vim
+
+if [0]' SCFTYP=':
+    scftyp,runtyp,exetyp = /^ SCFTYP=\s*(\S+)\s*RUNTYP=\s*(\S+)\s*EXETYP=\s*(\S+)/
+endif
+
+if [0]' MPLEVL=':
+    mplevl,cityp,cctyp = /^ MPLEVL=\s*(\S+)\s*CITYP =\s*(\S+)\s*CCTYP =\s*(\S+)/
+endif 
+
+if [0]' DFTTYP=':
+    dft,tddft = /^ DFTTYP=\s*(\S+)\s*TDDFT =\s*(\S+)/
+endif
+
+if [0]'          IHREP  =':
+    hssend = /HSSEND =\s*(\S+)/
+endif
+
+if [0]' ITER EX DEM     TOTAL ENERGY        E CHANGE':
+    table(scf_progress,run_until=//):
+        if /^\s*\d+/:
+            row = characters([11-30])
+        endif
+        jump(1)
+    endtable
+endif
+
+if [0]' SCF IS UNCONVERGED, TOO MANY ITERATIONS':
+    scf_notconv = 'True'
+endif
+
+# FMO
+if [0]'                  The Fragment Molecular Orbital (FMO) method':
+    fmo = 'True'
+endif
+
+if [0]' N-body FMO method':
+    fmo_level = /N-body FMO method:\s*(\S+)/
+endif
+
+# FMO
+if [18]'energies diverged!!! The total properties are not meaningful':
+    scf_notconv = 'True'
+endif
+    
+# FMO
+if [0]' Total energy of the molecule: Euncorr(2)':
+    dftb_energy = /Total energy of the molecule: Euncorr\(2\)=\s*(\S+)/
+endif
+
+# FMO
+if [0]' Total charge:':
+    charge = /Total charge:\s+(\S+)/
+endif
+
+if [0]'Total spin multiplicity:':
+    mult = /Total spin multiplicity:\s+(\S+)/
+endif
+
+
+if [0]'                       TOTAL ENERGY =':
+    SCF_energy = /^                       TOTAL ENERGY =\s+(\S+)/
+endif
+
+if [0]' FINAL':
+    SCF_energy = /^ FINAL.*ENERGY IS\s+(\S+)/
+endif
+
+if [0]'        MBPT(2) ENERGY:':
+    mbpt2_energy    = /MBPT\(2\) ENERGY:\s+(\S+)/
+endif
+
+if [0]'        CCSD    ENERGY:':
+    ccsd_energy     = /CCSD    ENERGY:\s+(\S+)/
+endif
+
+if [0]'        CCSD[T] ENERGY:':
+    ccsd_bTb_energy = /CCSD\[T\] ENERGY:\s+(\S+)/
+endif
+
+if [0]'        CCSD(T) ENERGY:':
+ccsd_pTp_energy = /CCSD\(T\) ENERGY:\s+(\S+)/
+endif
+
+if [0]' T1 DIAGNOSTIC        =':
+    T1_diagnostic = /T1 DIAGNOSTIC        =\s+(\S+)/
+endif
+
+
+# basis set
+if [0]'     GBASIS=':
+    gbasis,igauss,polar = /^     GBASIS=\s*(\S+)\s+IGAUSS=\s*(\S+)\s+POLAR=\s*(\S+)/
+endif
+
+if [0]'     NDFUNC=':
+    ndfunc,nffunc,diffsp = /^     NDFUNC=\s*(\S+)\s+NFFUNC=\s*(\S+)\s+DIFFSP=\s*(\S+)/
+endif
+
+if [0]'     NPFUNC=':
+    npfunc,diffs,basnam=/^     NPFUNC=\s*(\S+)\s+DIFFS=\s*(\S+)\s+BASNAM=\s*(\S+)/        
+endif
+
+if [0]' THE POINT GROUP OF THE MOLECULE IS':
+    sym = /^ THE POINT GROUP OF THE MOLECULE IS\s+(\S+)/
+endif
+
+if [0]' BEGINNING GEOMETRY SEARCH POINT NSERCH=':
+    new_step = /^ BEGINNING GEOMETRY SEARCH POINT NSERCH=\s*(\S+)/
+endif
+
+if [0]' NUMBER OF CARTESIAN ATOMIC ORBITALS=':
+naos = /^ NUMBER OF CARTESIAN ATOMIC ORBITALS=\s*(\S+)/
+endif
+
+if [0]' NUMBER OF CARTESIAN GAUSSIAN BASIS FUNCTIONS =':
+    naos = /^ NUMBER OF CARTESIAN GAUSSIAN BASIS FUNCTIONS =\s*(\S+)/
+endif
+
+if [0]' TOTAL NUMBER OF MOS IN VARIATION SPACE=':
+    nmos = /^ TOTAL NUMBER OF MOS IN VARIATION SPACE=\s*(\S+)/
+endif
+
+if [0]' THE NUMBER OF SPHERICAL HARMONICS KEPT IN THE VARIATION SPACE IS':
+    nmos = /^ THE NUMBER OF SPHERICAL HARMONICS KEPT IN THE VARIATION SPACE IS\s*(\S+)/
+endif
+
+if [0]' TOTAL NUMBER OF ATOMIC ORBITALS       =':
+    nmos = /NUMBER OF ATOMIC ORBITALS:\s*(\S+)/
+endif
+
+if [0]' TOTAL NUMBER OF ATOMS                        =':
+    natoms = /^ TOTAL NUMBER OF ATOMS                        =\s*(\S+)/
+endif
+
+if [0]' Number of atoms:':
+    natoms = /Number of atoms:\s*(\S+)/
+endif
+
+if [0]'          EIGENVECTORS':
+    space_filler(start=/^          EIGENVECTORS$/, nlines=(ceiling(nmos/5)*(naos+4)))
+endif
+
+if [0]'          ----- MULLIKEN ATOMIC OVERLAP POPULATIONS -----':
+    space_filler(start=/^          ----- MULLIKEN ATOMIC OVERLAP POPULATIONS -----/, nlines=(ceiling(natoms/5)*ceiling((2*natoms-5*(ceiling(natoms/5)-1)+6)/2)))
+endif
+
+if [0]' NUMBER OF OCCUPIED ORBITALS (ALPHA)          =':
+    nocc = /^ NUMBER OF OCCUPIED ORBITALS \(ALPHA\)          =\s*(\S+)/
+endif
+
+if [0]'     ATOMIC MULLIKEN POPULATION IN EACH MOLECULAR ORBITAL':
+    space_filler(start=/^     ATOMIC MULLIKEN POPULATION IN EACH MOLECULAR ORBITAL/, nlines=(ceiling(nocc/5)*(natoms+5)))
+endif
+
+if [0]' SPIN MULTIPLICITY                            =':
+    mult = /^ SPIN MULTIPLICITY                            =\s*(\S+)/
+endif
+
+if [0]' CHARGE OF MOLECULE                           =':
+    charge = /^ CHARGE OF MOLECULE                           =\s*(\S+)/
+endif
+
+if [0]'     SOLVNT=':
+    solvent = /SOLVNT=\s*(\S+)/
+endif
+
+if [0]'     INPUT FOR':
+    solv_model = /INPUT FOR\s*(.*)\s+METHOD/
+endif
+
+if [0]' NDFTB  =':
+    ndftb,scc,dftb3 = /NDFTB  =\s*(\S+)\s+SCC    =\s*(\S+)\s+DFTB3  =\s*(\S+)\s+/
+endif
+
+if [0]' - TURN ON A PRELIMINARY VERSION OF LONG-RANGE CORRECTED DFTB':
+    lcdftb = 'True'
+endif
+
+if [0]'          MAXIMUM GRADIENT':
+    max_force, rms_force = characters([29-38],[57-66])
+endif
+
+if [0]'      ***** EQUILIBRIUM GEOMETRY LOCATED':
+    opt_ok = 'True'
+endif
+
+if [0]'1     ***** SADDLE POINT LOCATED *****':
+    opt_ok = 'True'
+endif
+
+if [0]'     THERMOCHEMISTRY AT T=':
+    thermo_temp = /^     THERMOCHEMISTRY AT T=\s+(\S+)/
+endif
+
+if [0]' EXECUTION OF GAMESS TERMINATED NORMALLY':
+    term_ok = 'True'
+endif
+
+if [0]'              E         H         G         CV        CP        S':
+    jump(1)
+    if /^           KJ/:
+        jump(5)
+        thermo_units = 'kJ/mol'
+        thermo_e_corr, thermo_h_corr, thermo_g_corr = /TOTAL\s*(\S+)\s*(\S+)\s*(\S+)/
+    endif
+endif
+
+if [0]' COORDINATES OF ALL ATOMS ARE (ANGS)':
+    is_geom_ang = 'True'
+    jump(3)
+    table(geom,run_while=/\s+-?\d*\.\d*\s+-?\d*\.\d*\s+-?\d*\.\d*/):
+        row = field(1,3-5)
+        jump(1)
+        if /^ DDI:/:
+            jump /CPU timing/
+            jump /-----/
+            jump(1)
+        endif
+    endtable
+endif
+
+if [0]' ATOM      ATOMIC                      COORDINATES (BOHR)':
+    is_geom_bohr = 'True'
+    jump(2)
+    table(geom_bohr,run_until=//):
+        row = field(1,3-5)
+        jump(1)
+    endtable
+endif
+
+#if /^     FREQUENCIES IN CM\*\*-1, IR INTENSITIES IN DEBYE\*\*2/:
+    #jump(9)
+    #first_vibration = table(run_until=//):
+        #row = characters([22-32])
+        #jump(1)
+#endif
+
+if [0]'       FREQUENCY:':
+    jump(5)
+    table(vibrations,run_until=//):
+        row = characters([22-32],[34-44],[46-56],[58-68],[70-80])
+        jump(1)
+    endtable
+endif
+
+if [0]'  MODE FREQ(CM**-1)  SYMMETRY  RED. MASS  IR INTENS':
+    jump(1)
+    table(freqs,run_until=//):
+        row = field(2,5)
+        jump(1)
+    endtable
+endif
+
+
+# vim: filetype=awk

@@ -1,0 +1,176 @@
+=====================================
+Description of the *_rules.txt syntax
+=====================================
+
+[DEFINE PROGRAM]
+(GLOBAL_COMMAND\n)*
+
+# Description
+The parser goes through the provided lines one by one.
+For each line, it executes the provided *_rules.txt.
+
+See also: enforce_complete_parsing flag
+
+# Example
+command1
+...
+commandN
+
+[DEFINE] GLOBAL_COMMAND
+    : key(, key)* = FUNCTION # uses FUNCTION to extract values that will be assigned to key(s)
+    | if                        # switches into line-by-line control when REGEXP found
+    | space_filler              # quickly skips large blocks of text
+    | distractor                # removes disrupting block texts
+    | flag                      # sets options
+    | #                         # comment (anything from # to the end of line is a comment)
+    ;
+
+[DEFINE] FUNCTION             # extracts values from the current line defined by:
+    : /REGEXP/                  # REGEXP
+    | (EXPRESSION)              # numeric constant or other EXPRESSION
+    | 'WORD'                    # string constant
+    | characters                # character position
+    | field                     # fields delimited by FIELD_SEPARATOR
+    | table                     # special rules for parsing tables
+    ;
+
+[DEFINE] LINE_BY_LINE_COMMAND      # does something in a line-by-line mode (to be used by GLOBAL_COMMAND 'if' and FUNCTION 'table')
+    : jump                      # skips certain lines (defined by number or desired REGEXP) 
+    | if                        # the same as in GLOBAL_COMMAND
+    | repeat                    # repeats the block with the same indentation (useful for table) (maybe, IF as well?)
+    | key (, key)* = FUNCTION   # uses FUNCTION
+    ;
+
+
+================= GLOBAL_COMMAND items =======================
+
+====== [GLOBAL_COMMAND] assign (or =) =======
+key (, key)* = FUNCTION
+ 
+# Description
+Assigns values from FUNCTIONs to key(s).
+Note that FUNCTION will be applied to every line of the input,
+
+====== [GLOBAL_COMMAND] if ======
+if /REGEXP/: 
+(   LINE_BY_LINE_COMMAND\n)+  # could be repeated until there exist commands with proper indentation
+endif
+
+== [LINE_BY_LINE_COMMAND] jump ==
+jump(n)
+# Skips (n-1) lines without parsing them. The next line will be read and ready for parsing
+ 
+jump(/REGEXP/)
+# Skips lines until REGEXP is found. The line containing REGEXP will be ready for parsing
+ 
+== [LINE_BY_LINE_COMMAND] assign (i.e. =) ==
+key (, key)* = FUNCTION
+
+# Description
+The same as assign GLOBAL_COMMAND but it parses only the current line
+ 
+====== [GLOBAL_COMMAND] distractor ======
+distractor(start=/REGEXP/, end=/REGEXP/)
+
+# Description
+Removes a block of text from the analysis because 
+it was placed there by a mistake.
+
+It acts on the full lines.
+
+distractor command has high priority, and parser will 
+check a line for the presence of distractor signature
+before starting looking for useful data.
+
+====== [GLOBAL_COMMAND] space_filler =====
+space_filler(start=/REGEXP/, nlines=(EXPRESSION))
+
+# Description
+Log files could be huge, in part due to the large tables that 
+might be not of interest for the current analysis. In such situations,
+it is practical to identify such tables or other blocks of text and 
+do not parse them to save some time.
+
+====== [GLOBAL_COMMAND] flag ======
+flag
+(   FLAG=(\S+)\n)+  
+
+# Description
+Flags to be used to modify the parser behavior
+
+[FLAG] enforce_complete_parsing (default on)
+# Description
+on: continues parsing a line even after an assignment has been made by a previous command
+off: once an assignment was performed, proceed to the next line of input.
+
+[FLAG] indentation (default 4)
+
+[FLAG} field_separator
+
+================= FUNCTION items =======================
+
+== [FUNCTION] characters ==
+    characters([CONTINUOUS_RANGE](, [CONTINUOUS_RANGE])*) 
+
+# Description
+extract the keys based on the character position 
+
+Returns as many values as possible.
+
+positional expressions should be faster
+than the regexps using groups
+
+First character in line has index 1!
+ 
+== [FUNCTION] field ==
+    field([RANGE])
+
+# Description
+assigns the keys the values from the symbol-separated fields in the current line
+
+== [FUNCTION] table ==
+    table(run_until=/REGEXP/ | run_while=/REGEXP/):
+(       LINE_BY_LINE_COMMAND\n)+  
+    
+# Description
+The context commands that assign to keys should assign to the special key named 'columns' instead.
+
+================= other DEFINE items =======================
+[DEFINE] REGEXP
+# Description
+Python-compatible regular expressions with groups, e.g.
+    /RUNTYP\s*=\s*(\S+)/
+    /spin\s*=\s*(\S+), multiplicity=\s*(\S+)/
+...or without groups, e.g.
+    /Stationary point found/
+
+If the groups defined by parentheses are present, 
+the values extracted from those groups will be assigned to the key(s).
+
+If the number of groups is different from the number of keys, SyntaxError will be thrown
+
+[DEFINE] RANGE
+    : I,J-K 
+# Description
+Define the set of numbers using commas and dashes
+J-K defines the range from J to K including boundaries
+
+[DEFINE] CONTINUOUS_RANGE
+    : I-J 
+# RANGE wth restriction that it should be continuous
+
+[DEFINE] FIELD_SEPARATOR
+    : ' ' # or any other symbol
+
+[DEFINE] EXPRESSION   
+# Description
+arithmetic expression, which could include +-*/() symbols, numbers, 
+functions ceiling() and floor()
+and keys from the input, such as
+    (natoms*3 - 6)
+    (ceiling(nbasis/5)*(nbasis+3))
+Expressions should be enclosed in parentheses
+
+[DEFINE] WORD
+# Description
+A string

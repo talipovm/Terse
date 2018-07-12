@@ -1,0 +1,57 @@
+For an electronic structure calculation result, the following logic will be applied
+to produce a web page:
+
+*[job_step.webdata]:
+# b2
+(the whole job for a single-job file or a single job for the multiple-job files)
+[V] .ok: normal termination
+[V] .lot: level of theory
+[ ] .solv_model, .solvent: solvation
+[V] .sym: symmetry
+[V] .charge, .mult: charge and multiplicity
+[ ] .s2: S^2 for open shell
+[V] .scf_e: DFT/HF energy
+[ ] .post_hf: Post-HF energies
+[ ] .amplitude, .T1: amplitude and T1 diagonostics (for CC calculations)
+
+if .JobType==sp and not converged:
+    if scf/HF: show SCF convergence plot
+
+if .jobType==freq:
+    show T, H, E, G for each temperature
+    if .freq:
+        show freqs
+
+if .frozen:
+    show frozen params
+
+if .JobType==opt:
+    if not .opt_ok:
+        show geometry convergence plot
+
+if .JobType==irc:
+    show irc.webdata
+
+if .JobType==scan:
+    show scan.webdata
+
+if .JobType==td:
+    show table of .uv
+
+For each geom:
+    if g.atprops:
+        g.webdata
+
+.comments: show notes
+.warnings: show warnings
+.extra: show additional notes
+
+# b1
+
+: Save xyz file with geoms
+: load applet we.JMolLoad with StartApplet=False and show labels
+: show geometry convergence buttons
+
+
+
+*[job_step.webdata]:

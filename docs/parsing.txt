@@ -1,0 +1,89 @@
+=====================================
+Description of the *_parsing.txt syntax
+=====================================
+
+[DEFINE PROGRAM]
+(GLOBAL_COMMAND\n)*
+
+# Description
+The parser goes through and executes the provided lines one by one.
+
+# Example
+command1
+...
+commandN
+
+[DEFINE] GLOBAL_COMMAND
+    : ->
+    | aggregate_before
+    | aggregate_after
+    | last_value
+    | nonempty
+    | join_unique
+    ;
+
+================= GLOBAL_COMMAND items =======================
+
+====== [GLOBAL_COMMAND] -> =======
+old_key -> new_key
+old_key=old_value -> new_key
+old_key -> new_key=new_value
+old_key=old_value -> new_key=new_value
+ 
+# Description
+Rename old_key to new_key.
+If old_value is provided, only old_key=old_value pairs are renamed.
+If new_value is provided, old_value will be replaced by new_value.
+
+====== [GLOBAL_COMMAND] aggregate_before, aggregate_after  ======
+aggregate_before(separator_key) -> new_key
+aggregate_after(separator_key) -> new_key
+
+# Description
+Uses separator_key as a divider to aggregate certain sections.
+_before and _after denote whether separator_key should go 
+to the next or previous section, respectively.
+
+If groups have already been created by another use of aggregate_*
+command, then the current call will aggregate within each group and 
+create subgroups. The order of the aggregate calls is important!
+
+Multiple levels of folding are allowed.
+
+The new_key values recognized by the next step of the analysis are:
+job, scan, irc, opt.
+
+job: to separate jobs in the log files of programs that support
+multiple jobs within a file (e.g. Gaussian, Orca).
+scan: relaxed scan steps
+irc: IRC steps
+opt: optimization steps
+
+====== [GLOBAL_COMMAND] last_value ======
+last_value(old_key) -> new_key
+
+# Description
+Assigns the last_value found value in old_key into new_key
+New element for new_key within each group will be created.
+ 
+====== [GLOBAL_COMMAND] nonempty ======
+nonempty(old_key) -> new_key
+
+# Description
+The same as '->' but it acts only when old_key value is not equal to 'empty'.
+
+# Example:
+# final_wftype will take the dft value only if it is not equal 
+# to NONE
+dft=NONE -> dft=empty
+last_value(dft) -> wf_dft
+nonempty(wf_dft) -> final_wftype
+
+====== [GLOBAL_COMMAND] join_unique ======
+join_unique(old_key) -> new_key
+
+# Description
+Assigns the unique values found in old_key 
+as a list into new_key.
+New element for new_key within each group will be created.
+ 

@@ -1,0 +1,34 @@
+<HTML>
+    <HEAD>
+        <TITLE>
+            Terse results of electronic structure calculations
+        </TITLE>
+        <META http-equiv="Content-Type" content="text/html; Charset=UTF-8">
+		<META http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+		<META http-equiv="Pragma" content="no-cache"/>
+		<META http-equiv="Expires" content="0"/>
+        <script type="text/javascript" src="/jmol/jsmol/JSmol.min.js"></script>
+        <script type="text/javascript" src="/jmol/jsmol/js/JSmolThree.js"></script>
+        <script type="text/javascript" src="/jmol/jsmol/js/JSmolGLmol.js"></script>
+        <script type="text/javascript">
+        var JmolApplet0;
+        jmol_isReady = function(applet) {
+            Jmol.script(applet,"%(jmoloptions)s")
+        }
+        var Info = {
+          width: %(JMolWinX)s,
+          height: %(JMolWinY)s,
+          use: "HTML5",
+          readyFunction: jmol_isReady,
+          j2sPath: "/jmol/jsmol/j2s"
+        }
+        </script>
+    </HEAD>
+    <BODY link="black">
+        <p><h3>%(timestamp)s</h3></p>
+        <TABLE border="1" cellspacing="0" cellpadding="4">
+        %(TableBody)s
+        </TABLE>
+    </BODY>
+</HTML>
+

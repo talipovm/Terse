@@ -1,10 +1,10 @@
+import Tools.HTML
 from Top import Top
 
 import logging
 log = logging.getLogger(__name__)
 from Interface.XYZ import XYZ
 from Geometry.Geom import Geom
-import Tools.web as web
 import Tools.misc as misc
 from Tools.plot import Plot
 if __name__ == "__main__":
@@ -47,7 +47,7 @@ class WebData(Top):
                 (ylab, yval) = zip(*convergence.items())  # reshape them
                 plt = Plot(fname='-opt-conv.png', xlab='x', ylab='Convergence', legend=ylab, x=None, y=yval)
                 plt.save_plot()
-                b2 += web.img(plt.web_path)
+                b2 += Tools.HTML.img(plt.web_path)
 
             # Will show on top of the structure
             labeltext = 'Geometry optimization, step @{_modelNumber}'
@@ -59,6 +59,9 @@ class WebData(Top):
         # save geoms into XYZ and produce a path to it
         webpath = XYZ().write(fname='.xyz',geoms=geoms,vectors=False)
 
+        if opt_ok != 'True':
+            b2 += Tools.HTML.color('Geometry optimization is not complete!','err')
+
         # produce HTML code
         load_command  = self.we.jmol_load_file(webpath)
         load_command += '; ' + 'frame last'
@@ -66,11 +69,11 @@ class WebData(Top):
         b1 += self.we.jmol_command_to_html(load_command)
 
         b1 += 'Optimization step: '
-        b1 += self.we.html_button(load_command,'Opt') + web.brn
+        b1 += self.we.html_button(load_command,'Opt') + Tools.HTML.brn
 
         # add a button bar to play geoms if more than one is given
         if len(geoms)>1:
-            b1 += web.brn + self.we.html_geom_play_controls()
+            b1 += Tools.HTML.brn + self.we.html_geom_play_controls()
         return (b1,b2)
 
     def webdata_freq(self, freq):
@@ -93,17 +96,17 @@ class WebData(Top):
             # TODO move to processing
             freqs_cm = [float(fr[0]) for fr in P.last_value('freqs')]
 
-            b2 += web.br + "Freqs: "
+            b2 += Tools.HTML.br + "Freqs: "
 
             start_from_freq = 6 # TODO should not be hard-coded; some programs ignore TRANSL/ROT freqs automatically
             i = start_from_freq
             while freqs_cm[i] < 0:
                 s_freq = "%.1f," % freqs_cm[i]
                 if i == start_from_freq:
-                    b2 += web.color(s_freq,'imag')
+                    b2 += Tools.HTML.color(s_freq, 'imag')
                     im_freq = True
                 else:
-                    b2 += web.color(s_freq,'err')
+                    b2 += Tools.HTML.color(s_freq, 'err')
                 i += 1
             b2 += "%.1f .. %.1f\n" % (freqs_cm[i], freqs_cm[-1])
 
@@ -123,8 +126,8 @@ class WebData(Top):
         b1 += self.we.html_button(load_command,'Freq')
 
         if im_freq:
-            b2 += web.brn + web.color('Imaginary Freq(s) found!','imag')
-            b1 += self.we.html_vibration_switch() + web.brn
+            b2 += Tools.HTML.brn + Tools.HTML.color('Imaginary Freq(s) found!', 'imag')
+            b1 += self.we.html_vibration_switch() + Tools.HTML.brn
 
         T = freq.get_value('thermo_temp')
         E_corr = freq.get_value('thermo_e_corr')
@@ -132,9 +135,9 @@ class WebData(Top):
         G_corr = freq.get_value('thermo_g_corr')
         thermo_units = freq.last_value('thermo_units')
         if E_corr:
-            b2 += web.br + web.tag("Thermochemical corrections:","strong")
+            b2 += Tools.HTML.br + Tools.HTML.tag("Thermochemical corrections:", "strong")
             for v in zip(*[T,E_corr,H_corr,G_corr]):
-                b2 += web.br + "T=%s: E= %s, H= %s, G= %s " % v
+                b2 += Tools.HTML.br + "T=%s: E= %s, H= %s, G= %s " % v
                 b2 += "(%s)\n" % thermo_units
 
         return (b1,b2)
@@ -156,7 +159,7 @@ class WebData(Top):
         b1 += self.we.jmol_command_to_html(load_command)
 
         b1 += 'Single Point step: '
-        b1 += self.we.html_button(load_command,'Energy') + web.brn
+        b1 += self.we.html_button(load_command,'Energy') + Tools.HTML.brn
 
         if sp.last_value('scf_notconv')== 'True' or sp.last_value('term_ok')!= 'True':
 
@@ -171,9 +174,9 @@ class WebData(Top):
             plt = Plot(fname='-sp-conv.png', xlab=xlab, ylab=ylab, legend=ylab, x=None, y=yval)
             if plt.nonempty:
                 plt.save_plot()
-                b2 += web.img(plt.web_path)
+                b2 += Tools.HTML.img(plt.web_path)
             else:
-                b2 +=  web.br + 'Not enough data to produce convergence plot'
+                b2 += Tools.HTML.br + 'Not enough data to produce convergence plot'
 
         return (b1,b2)
 
@@ -196,53 +199,53 @@ class WebData(Top):
             sx = " ".join(jobtype).upper()
         else:
             sx = jobtype.upper()
-        sx = web.br + web.tag(sx,'strong')
+        sx = Tools.HTML.br + Tools.HTML.tag(sx, 'strong')
         if P.last_value('term_ok')== 'True':
             b2 += sx
         else:
-            b2 += web.color(sx,'err')
+            b2 += Tools.HTML.color(sx, 'err')
 
         # level of theory
         lot = '%s/%s' % (P.last_value('wftype'), P.last_value('basis'))
-        b2 += web.br + web.color(lot.upper(),'lot')
+        b2 += Tools.HTML.br + Tools.HTML.color(lot.upper(), 'lot')
 
         # level of theory, additional record
         if P.last_value('wftype_fragment') is not None:
             lot2 = 'Fragmentation scheme: ' + P.last_value('wftype_fragment')
-            b2 += web.br + web.color(lot2,'lot')
+            b2 += Tools.HTML.br + Tools.HTML.color(lot2, 'lot')
 
         # symmetry, charge, multiplicity
-        b2 += web.br + "Symmetry: %s\n" % P.last_value('final_sym')
-        b2 += web.br + "Charge: %s; "  % P.last_value('final_charge')
+        b2 += Tools.HTML.br + "Symmetry: %s\n" % P.last_value('final_sym')
+        b2 += Tools.HTML.br + "Charge: %s; " % P.last_value('final_charge')
         b2 += "Mult: %s\n"  % P.last_value('final_mult')
 
         # open shell, s2
         if P.last_value('open_shell')== 'True':
-                b2 += web.br + "Open Shell; S2= %s,\n" % P.last_value('S2')
+                b2 += Tools.HTML.br + "Open Shell; S2= %s,\n" % P.last_value('S2')
 
         # last_value SCF energy
         try:
-            b2 += web.br + "Last SCF Energy= %-11.6f\n" % float(P.last_value('scf_e'))
+            b2 += Tools.HTML.br + "Last SCF Energy= %-11.6f\n" % float(P.last_value('scf_e'))
         except TypeError:
-            b2 += web.br + "Last SCF Energy N/A\n"
+            b2 += Tools.HTML.br + "Last SCF Energy N/A\n"
 
         if P.last_value('scf_notconv')== 'True':
-            b2 += web.br + web.color('SCF did not converge!','err')
+            b2 += Tools.HTML.br + Tools.HTML.color('SCF did not converge!', 'err')
 
         if P.last_value('final_solvent') is not None:
             sx = 'Solvation: '
             if P.last_value('final_solv_model') is not None:
                 sx += '%s(%s)' % (P.last_value('final_solv_model'), P.last_value('final_solvent'))
-            b2 += web.br + web.tag(sx,'lot')
+            b2 += Tools.HTML.br + Tools.HTML.tag(sx, 'lot')
 
         if P.last_value('ccsd_pTp_energy') is not None:
-            b2 += web.br + "Last CCSD(T) Energy= %-11.6f\n" % float(P.last_value('ccsd_pTp_energy'))
+            b2 += Tools.HTML.br + "Last CCSD(T) Energy= %-11.6f\n" % float(P.last_value('ccsd_pTp_energy'))
             if P.last_value('T1_diagnostic') is not None:
                 T1 = float(P.last_value('T1_diagnostic'))
                 s_T1 = "T1 diagnostic= %.3f\n" % T1
                 if T1 >= 0.025:
-                    s_T1 = web.tag(s_T1,'err')
-                b2 += web.br + s_T1
+                    s_T1 = Tools.HTML.tag(s_T1, 'err')
+                b2 += Tools.HTML.br + s_T1
         # P is wrapped in the aggregation order: job > scan > irc > opt;
         # should unwrap in the same order:
         if 'scan' in jobtype:

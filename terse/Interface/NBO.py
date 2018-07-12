@@ -1,3 +1,5 @@
+import Tools.HTML
+
 if __name__ == "__main__":
     import sys,os
     selfname = sys.argv[0]
@@ -7,9 +9,7 @@ if __name__ == "__main__":
     print("Append to PYTHONPATH: %s" % (dirpath))
     sys.path.append(dirpath)
 
-import time,re,logging
-import math
-from Tools import web
+import re,logging
 from Tools.file2 import file2
 from Top import Top
 from Containers import Topology, AtomicProps
@@ -51,7 +51,7 @@ class nbo_result(Top):
         for sopta in self.sopta:
             if float(sopta.e2) > 10.0:
                 s += '%15s --> %15s: %s' % (sopta.donor.sorb, sopta.acceptor.sorb, sopta.e2)
-                s += web.brn
+                s += Tools.HTML.brn
         return s
 
     def atomByID(self,i):
@@ -235,10 +235,10 @@ class NBO(Top):
         self.NBO_version = re.search('\*+(.*?)\*+',FI.s).groups()[0].strip()
 
         # Options
-        self.options = web.brn.join(FI.find_text_block(start_match='/ : '))
+        self.options = Tools.HTML.brn.join(FI.find_text_block(start_match='/ : '))
 
         # Density
-        self.comments += FI.nstrip() + web.brn
+        self.comments += FI.nstrip() + Tools.HTML.brn
 
         # Job title
         FI.skip_n()
@@ -387,17 +387,17 @@ class NBO(Top):
 
         #b2 += 'Version: %s' % (self.NBO_version)  + web.brn
         if self.options:
-            b2 += web.tag('NBO options:','strong')+web.brn
-            b2 += self.options + web.brn
+            b2 += Tools.HTML.tag('NBO options:', 'strong') + Tools.HTML.brn
+            b2 += self.options + Tools.HTML.brn
         if self.comments:
-            b2 += self.comments + web.brn
+            b2 += self.comments + Tools.HTML.brn
         if self.OpenShell:
-            b2 += web.tag('Alpha spin NBO interactions','strong') + web.brn
+            b2 += Tools.HTML.tag('Alpha spin NBO interactions', 'strong') + Tools.HTML.brn
             b2 += self.setA.webdata()
-            b2 += web.tag('Beta spin NBO interactions','strong') + web.brn
+            b2 += Tools.HTML.tag('Beta spin NBO interactions', 'strong') + Tools.HTML.brn
             b2 += self.setB.webdata()
         else:
-            b2 += web.tag('NBO interactions','strong') + web.brn
+            b2 += Tools.HTML.tag('NBO interactions', 'strong') + Tools.HTML.brn
             b2 += self.setAB.webdata()
 
         log.debug('webdata generated successfully')

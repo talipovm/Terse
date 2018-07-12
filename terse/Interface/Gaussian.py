@@ -1,3 +1,5 @@
+import Tools.HTML
+
 if __name__ == "__main__":
     import sys,os
     append_path = os.path.abspath(sys.argv[0])[:-20]
@@ -5,14 +7,12 @@ if __name__ == "__main__":
     sys.path.append(append_path)
 
 import re
-import math
 import copy
-import Tools.web as web
 from Tools.file2 import file2
-import ChemicalInfo
+from Tools import ChemicalInfo
 from Geometry import Scan,IRC,Geom,ListGeoms
-from ElStr import ElectronicStructure
-from Containers import AtomicProps,Topology
+from ElectronicStructure import ElectronicStructure
+from Containers import AtomicProps
 from Interface.NBO import NBO
 
 import logging
@@ -84,11 +84,11 @@ class Gaussian(ElectronicStructure):
         if b1s:
             bb1 = we.JMolApplet(ExtraScript = b1s[n_Freq-1][0])
             if MaxGeoms > 1:
-                bb1 += web.brn + we.html_geom_play_controls()
+                bb1 += Tools.HTML.brn + we.html_geom_play_controls()
             if n_Freq:
-                bb1 += web.brn + we.html_vibration_switch()
+                bb1 += Tools.HTML.brn + we.html_vibration_switch()
             if len(b1s)>1:
-                bb1 += web.brn*2
+                bb1 += Tools.HTML.brn * 2
                 # add buttons for each step
                 for b1 in b1s:
                     bb1 += we.html_button(*b1)
@@ -886,7 +886,7 @@ if __name__ == "__main__":
     from Top import Top
     Top.settings = Settings(from_config_file= True)
 
-    from HTML import HTML
+    from Tools.HTML import HTML
     WebPage = HTML()
     WebPage.makeHeader()
 

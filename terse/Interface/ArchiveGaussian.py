@@ -1,3 +1,5 @@
+import Tools.HTML
+
 if __name__ == "__main__":
     import sys,os
     append_path = os.path.abspath(sys.argv[0])[:-19]
@@ -8,14 +10,11 @@ if __name__ == "__main__":
     sys.path.append(append_path)
 
 import re
-import math
 import Tools.web as web
 from Tools.file2 import file2
-import ChemicalInfo
-from Geometry import Scan,IRC,Geom,ListGeoms
-from ElStr import ElectronicStructure
-from Containers import AtomicProps,Topology
-from Interface.NBO import NBO
+from Geometry import Geom
+import ElectronicStructure
+from Containers import AtomicProps
 
 import logging
 log = logging.getLogger(__name__)
@@ -78,7 +77,7 @@ class ArchiveGaussian(ElectronicStructure):
         if b1s:
             bb1 = we.JMolApplet(ExtraScript = b1s[-1][0])
             if len(b1s)>1:
-                bb1 += web.brn*2
+                bb1 += Tools.HTML.brn * 2
                 for b1 in b1s:
                     bb1 += we.html_button(*b1)
 

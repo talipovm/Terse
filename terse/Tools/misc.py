@@ -52,8 +52,3 @@ def get_range(s):
             i = int(s_element)
             v_res.append(i)
     return v_res
-
-def count_leading_white_spaces(s):
-    for i in range(len(s)):
-        if s[i] != ' ':
-            return i

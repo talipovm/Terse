@@ -1,3 +1,5 @@
+import Tools.HTML
+
 if __name__ == "__main__":
     import sys,os
     selfname = sys.argv[0]
@@ -8,7 +10,6 @@ if __name__ == "__main__":
     sys.path.append(dirpath)
 
 import logging
-import Tools.web as web
 from Tools.plot import Plot
 from Top import Top
 import Interface.XYZ
@@ -125,7 +126,7 @@ class ListGeoms(Top):
         r = ''
         for g in self.geoms:
             if g.comment.strip():
-                r += g.comment + web.br
+                r += g.comment + Tools.HTML.br
         return r
 
 
@@ -155,7 +156,7 @@ class ListGeoms(Top):
             y = self.toBaseLine()
         plt = Plot('.png', xlab=xlabel, ylab=ylabel, x=x, y=y)
         plt.save_plot()
-        return web.img(plt.web_path)
+        return Tools.HTML.img(plt.web_path)
 
 
     def extrema(self,title='Min/Max points:',yg=None,naround=3,show_min=True,show_max=True,frame_names = None, frame_prefix='Point '):
@@ -164,7 +165,7 @@ class ListGeoms(Top):
         """
 
         we = self.settings.Engine3D()
-        s = web.br + title  + web.br
+        s = Tools.HTML.br + title + Tools.HTML.br
         s += we.html_button('Frame 1', 'First')
         lyg = len(yg)
         #print yg

@@ -6,9 +6,9 @@ if __name__ == "__main__":
 
 
 from Tools.file2 import file2
-from ElStr import ElectronicStructure
+from ElectronicStructure import ElectronicStructure
 from Interface.Processing import Processing
-from Grammar.Grammar2 import Grammar
+from Grammar.Grammar import Grammar
 from Interface.WebData import WebData
 import os.path
 
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     Top.settings = Settings(from_config_file= True)
     Top.settings.selfPath=append_path
 
-    from HTML import HTML
+    from Tools.HTML import HTML
     WebPage = HTML()
     WebPage.readTemplate()
 

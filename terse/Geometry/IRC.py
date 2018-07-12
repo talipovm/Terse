@@ -1,5 +1,5 @@
+import Tools.HTML
 from Geometry import ListGeoms
-import Tools.web as web
 
 import logging
 log = logging.getLogger(__name__)
@@ -85,7 +85,7 @@ class IRC(ListGeoms):
     def textirc(self,xs,ys):
         s = ''
         for x,y in zip(xs,ys):
-            s += "%.3f %.2f\n" % (x, y) + web.br
+            s += "%.3f %.2f\n" % (x, y) + Tools.HTML.br
         return s
 
 

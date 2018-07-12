@@ -10,8 +10,6 @@ if __name__ == "__main__":
 import logging
 import shutil
 from Top import Top
-import Tools.web as web
-from Geometry import ListGeoms,Geom
 from Interface.XYZ import XYZ
 from Tools.IO import is_readable
 log = logging.getLogger(__name__)

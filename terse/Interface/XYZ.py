@@ -1,11 +1,12 @@
+import Tools.HTML
+
 if __name__ == "__main__":
     import sys
     sys.path.append('..')
 
-import Tools.web as web
 import Geometry
 from Top import Top
-import ChemicalInfo
+from Tools import ChemicalInfo
 import logging
 log = logging.getLogger(__name__)
 
@@ -115,14 +116,14 @@ class XYZ(Top):
         we = self.settings.Engine3D()
 
         JmolScript = ''
-        b2 = web.tag('Comments:','strong') + web.brn + self.geoms.comment
+        b2 = Tools.HTML.tag('Comments:', 'strong') + Tools.HTML.brn + self.geoms.comment
         if self.scan:
             b2 += self.scan.webdata()
             JmolScript += we.html_measurements(self.scan.props)
             self.wp = self.scan.write(fname='.xyz',vectors=self.vector)
         else:
             self.wp = self.geoms.write(fname='.xyz',vectors=self.vector)
-        b1 = we.JMolApplet(webpath = self.wp, ExtraScript = JmolScript) + web.brn
+        b1 = we.JMolApplet(webpath = self.wp, ExtraScript = JmolScript) + Tools.HTML.brn
 
         if len(self.geoms.geoms)>1:
             b1 += we.html_geom_play_controls()
@@ -185,7 +186,7 @@ if __name__ == "__main__":
     from Settings import Settings
     Top.settings = Settings(from_config_file= True)
 
-    from HTML import HTML
+    from Tools.HTML import HTML
     WebPage = HTML()
     WebPage.makeHeader()
 

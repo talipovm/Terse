@@ -1,3 +1,5 @@
+import Tools.HTML
+
 if __name__ == "__main__":
     import sys,os
     append_path = os.path.abspath(sys.argv[0])[:-15]
@@ -5,15 +7,11 @@ if __name__ == "__main__":
     sys.path.append(append_path)
 
 import re
-import math
-import copy
 import Tools.web as web
 from Tools.file2 import file2
-import ChemicalInfo
 from Geometry import Scan,IRC,Geom,ListGeoms
-from ElStr import ElectronicStructure
-from Containers import AtomicProps,Topology
-from Interface.NBO import NBO
+import ElectronicStructure
+from Containers import AtomicProps
 
 import logging
 log = logging.getLogger(__name__)
@@ -81,11 +79,11 @@ class Orca(ElectronicStructure):
         if b1s:
             bb1 = we.JMolApplet(ExtraScript = b1s[n_Freq-1][0])
             if MaxGeoms > 1:
-                bb1 += web.brn + we.html_geom_play_controls()
+                bb1 += Tools.HTML.brn + we.html_geom_play_controls()
             if n_Freq:
-                bb1 += web.brn + we.html_vibration_switch()
+                bb1 += Tools.HTML.brn + we.html_vibration_switch()
             if len(b1s)>1:
-                bb1 += web.brn*2
+                bb1 += Tools.HTML.brn * 2
                 # add buttons for each step
                 for b1 in b1s:
                     bb1 += we.html_button(*b1)
@@ -411,7 +409,7 @@ if __name__ == "__main__":
     Top.settings = Settings(from_config_file= True)
     Top.settings.selfPath=append_path
 
-    from HTML import HTML
+    from Tools.HTML import HTML
     WebPage = HTML()
     WebPage.readTemplate()
 
@@ -424,5 +422,5 @@ if __name__ == "__main__":
     #print(f.steps[0])
     b1, b2 = f.webdata()
 
-    WebPage.addTableRow(str(f.file) + web.brn + b1, b2)
+    WebPage.addTableRow(str(f.file) + Tools.HTML.brn + b1, b2)
     WebPage.write()

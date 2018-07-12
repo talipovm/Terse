@@ -11,8 +11,7 @@ import logging
 import shutil
 import os
 from Top import Top
-import Tools.web as web
-from Geometry import ListGeoms,Geom
+from Geometry import Geom
 from Interface.JVXL import JVXL
 from Tools.IO import execute_Jmol
 import re
@@ -198,7 +197,7 @@ if __name__ == "__main__":
     f.extractXYZ()
     f.processFiles()
 
-    from HTML import HTML
+    from Tools.HTML import HTML
     WebPage = HTML()
     WebPage.makeHeader()
     b1,b2 = f.webdata()

@@ -68,7 +68,6 @@ def prepare_folder(d):
             return False
     return True
 
-
 def remove_cubes_from_tersepic(d):
     files = glob.glob(d + '/*.cube')
     try:
@@ -79,22 +78,6 @@ def remove_cubes_from_tersepic(d):
         return False
     log.debug(d + ' cleaned up')
     return True
-
-
-# def backupdir(d):
-#    if os.path.exists(d):
-#        if not os.access(d,os.W_OK):
-#            log.critical(d + ' exists but not writable')
-#            return False
-#    else:
-#        log.warning(d + ' does not exist')
-#        try:
-#            os.mkdir(d)
-#            log.warning(d + ' created')
-#        except:
-#            log.critical(d + ' can not be created')
-#            return False
-#    return True
 
 def execute_Jmol(jmol_abs_path, script):
     # Create temporary file

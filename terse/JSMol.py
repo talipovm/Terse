@@ -1,5 +1,5 @@
+import Tools.HTML
 from Top import Top
-import Tools.web as web
 import logging
 
 log = logging.getLogger(__name__)
@@ -16,14 +16,14 @@ class JSMol(Top):
 
     def initiate_jmol_applet(self):
         s = "jmolApplet%s = Jmol.getApplet(\"jmolApplet%s\", Info)" % ((self.settings.counter,) * 2)
-        return web.tag(s, 'SCRIPT')
+        return Tools.HTML.tag(s, 'SCRIPT')
 
     def jmol_command_to_html(self, s, intag=''):
         s2 = "Jmol.script(jmolApplet%(counter)s, \"%(script)s\" );" % {
             'counter': self.settings.counter,
             'script': s.replace('"', '\\"').replace("'", "\\'")  # s.replace('"',' &quot ')
         }
-        return web.tag(s2, 'SCRIPT', intag=intag)
+        return Tools.HTML.tag(s2, 'SCRIPT', intag=intag)
 
 
     def jmol_load_file(self, webpath):
@@ -134,7 +134,7 @@ class JSMol(Top):
             'script_off': off,
             'label': label
         }
-        return web.tag(s2, 'SCRIPT')
+        return Tools.HTML.tag(s2, 'SCRIPT')
 
     def jmol_radiogroup(self, options):
         s = ''
@@ -149,7 +149,6 @@ class JSMol(Top):
     def html_radiogroup(self, *args):
         s = self.jmol_radiogroup(*args)
         return self.jmol_command_to_html(s)
-
 
     def jmol_menu(self, options):
         s = ''
@@ -211,13 +210,13 @@ class JSMol(Top):
 
     def JSMolScript(self, s, intag=''):
         s2 = self.JSMolStyle(s)
-        return web.tag(s2, 'SCRIPT', intag=intag)
+        return Tools.HTML.tag(s2, 'SCRIPT', intag=intag)
 
     def JMolApplet(self, webpath='', ExtraScript=''):
         s = "jmolApplet%s = Jmol.getApplet(\"jmolApplet%s\", Info)" % ((self.settings.counter,) * 2)
         script = self.JMolLoad(webpath=webpath, ExtraScript=ExtraScript)
         s += ';\n' + self.JSMolStyle(script)
-        return web.tag(s, 'SCRIPT')
+        return Tools.HTML.tag(s, 'SCRIPT')
 
     def JMolLoad(self, webpath='', ExtraScript=''):
         sl = ''

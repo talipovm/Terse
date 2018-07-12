@@ -123,7 +123,7 @@ class Settings(Top):
 
         self.color = {'err':'red', 'imag':'blue', 'lot':'green'}
 
-        from Engine3D import JSMol
+        from JSMol import JSMol
         self.Engine3D = JSMol
         # self.JSMolLocation = "http://comp.chem.mu.edu"
         self.JSMolLocation = ''

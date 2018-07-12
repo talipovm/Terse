@@ -2,17 +2,24 @@
 
 import sys
 import shutil
+
+import Tools.HTML
 from Settings import Settings
-from HTML import HTML
+from Tools.HTML import HTML
 import logging
-import Tools.web as web
 from ParserFactory import ParserFactory
 import Tools.IO as IO
 from Top import Top
-# import cProfile
+
 import time
-import os
+
 start = time.time()
+
+do_parallel = False
+do_profiling = False
+
+if do_profiling:
+    import cProfile
 
 # DONE Calculate NMR proton chemical shifts from isotropic shieldings
 # DONE read/write E and gradients from/to .xyz file; make plots if E/dE available
@@ -183,10 +190,6 @@ def terse_file(fl,i=None):
 
     return (b1,b2)
 
-
-
-do_parallel = False
-
 if do_parallel:
     from multiprocessing import Pool,cpu_count
     pool = Pool(cpu_count()-1)
@@ -207,21 +210,23 @@ if do_parallel:
             b2 = ''
         else:
             (b1, b2) = out_b
-        WebPage.addTableRow(fl + web.brn + b1, b2)
+        WebPage.addTableRow(fl + Tools.HTML.brn + b1, b2)
         WebPage.write()
 
 else:
     # Main loop
     for fl in files:
-        out_b = terse_file(fl)
-        #cProfile.run('out_b = terse_file(fl)', 'restats')
+        if do_profiling:
+            cProfile.run('out_b = terse_file(fl)', 'restats')
+        else:
+            out_b = terse_file(fl)
         if out_b is None:
             b1 = 'file %s cannot be processed' % fl[1]
             b2 = ''
         else:
             (b1, b2) = out_b
 
-        WebPage.addTableRow(str(fl[1]) + web.brn + b1, b2)
+        WebPage.addTableRow(str(fl[1]) + Tools.HTML.brn + b1, b2)
 
         settings.counter += 1
         settings.subcounter = 0

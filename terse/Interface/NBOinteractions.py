@@ -1,3 +1,5 @@
+import Tools.HTML
+
 if __name__ == "__main__":
     import sys,os
     selfname = sys.argv[0]
@@ -7,15 +9,12 @@ if __name__ == "__main__":
     print("Append to PYTHONPATH: %s" % (dirpath))
     sys.path.append(dirpath)
 
-import time,re,logging
-import math
-from Tools import web
+import logging
 from Tools.IO import is_readable
 from Tools.file2 import file2
 from Interface.Gaussian import Gaussian
 from Interface.ChkGaussian import ChkGaussian
 from Top import Top
-import re
 log = logging.getLogger(__name__)
 
 
@@ -97,8 +96,8 @@ class NBOinteractions(Top):
 
         b1 = Lb1
 
-        b2  = web.tag('Gaussian Log File','strong')+web.brn + Lb2
-        b2 += web.tag('Gaussian Chk File','strong')+web.brn + Cb2
+        b2  = Tools.HTML.tag('Gaussian Log File', 'strong') + Tools.HTML.brn + Lb2
+        b2 += Tools.HTML.tag('Gaussian Chk File', 'strong') + Tools.HTML.brn + Cb2
 
         #---
         def set_webData(nbo_result):
@@ -132,23 +131,23 @@ class NBOinteractions(Top):
                     #script += "; "
                     #script += we.jmol_isosurface(webpath = c_acceptor.wpcube,  surftype='MO',name='mo'+i_acceptor,colors='phase green yellow')
                     s += we.html_button(action=script, label='Show')
-                    s += web.brn
+                    s += Tools.HTML.brn
             if any_shown:
                 s += we.html_button(action=script_off, label='Off')
             return s
         #---
         if self.nbo.options:
-            b2 += web.tag('Options:','strong')+web.brn
-            b2 += self.nbo.options + web.brn
+            b2 += Tools.HTML.tag('Options:', 'strong') + Tools.HTML.brn
+            b2 += self.nbo.options + Tools.HTML.brn
         if self.nbo.comments:
-            b2 += self.nbo.comments + web.brn
+            b2 += self.nbo.comments + Tools.HTML.brn
         if self.nbo.OpenShell:
-            b2 += web.tag('Alpha spin NBO interactions','strong') + web.brn
+            b2 += Tools.HTML.tag('Alpha spin NBO interactions', 'strong') + Tools.HTML.brn
             b2 += set_webData(self.nbo.setA)
-            b2 += web.tag('Beta spin NBO interactions','strong') + web.brn
+            b2 += Tools.HTML.tag('Beta spin NBO interactions', 'strong') + Tools.HTML.brn
             b2 += set_webData(self.nbo.setB)
         else:
-            b2 += web.tag('NBO interactions','strong') + web.brn
+            b2 += Tools.HTML.tag('NBO interactions', 'strong') + Tools.HTML.brn
             b2 += set_webData(self.nbo.setAB)
 
         log.debug('webdata generated successfully')

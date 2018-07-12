@@ -23,7 +23,6 @@ class Calculator(Top):
             if params is not None:
                 self.get_params = lambda x: params[x]
 
-
     @staticmethod
     def find_closing_parenthesis(s, i_start=0):
         depth = 0

@@ -1,3 +1,5 @@
+import Tools.HTML
+
 if __name__ == "__main__":
     import sys,os
     selfname = sys.argv[0]
@@ -12,10 +14,9 @@ import math
 import sys
 import subprocess
 from Interface.Cube import Cube
-from ElStr import ElectronicStructure
+from ElectronicStructure import ElectronicStructure
 from Geometry import Geom,ListGeoms,IRC
 from Containers import AtomicProps
-from Tools import web
 from Tools.file2 import file2
 log = logging.getLogger(__name__)
 
@@ -326,7 +327,7 @@ class FchkGaussian(ElectronicStructure):
                 e = pp[k]
                 if et == 'SCF':
                     continue
-                self.extra += '%s: %.8f' %(k,float(e)) + web.brn
+                self.extra += '%s: %.8f' % (k,float(e)) + Tools.HTML.brn
             # Densities
             for dt in d_types:
                 if ('Total %s Density' % dt) in k:

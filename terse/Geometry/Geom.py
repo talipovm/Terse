@@ -3,7 +3,7 @@ log = logging.getLogger(__name__)
 
 from Top import Top
 import Interface.XYZ
-from ChemicalInfo import BohrR
+from Tools.ChemicalInfo import BohrR
 
 class Geom(Top):
 

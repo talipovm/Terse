@@ -253,5 +253,12 @@ if [0]'  MODE FREQ(CM**-1)  SYMMETRY  RED. MASS  IR INTENS':
     endtable
 endif
 
+if [0]'          TOTAL MULLIKEN AND LOWDIN ATOMIC POPULATIONS':
+    jump(2)
+    table(charges_mull_low,run_until=//):
+        row = field(4,6)
+        jump(1)
+    endtable
+endif
 
 # vim: filetype=awk

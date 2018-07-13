@@ -1,4 +1,13 @@
 # [PROCESSING RULES]
+
+mplevl=0 -> mplevl=empty
+last_value(mplevl) -> wf_mp
+nonempty(wf_mp) -> wftype
+
+cityp=NONE -> cityp=empty
+last_value(cityp) -> wf_cityp
+nonempty(wf_cityp) -> wftype
+
 cctyp=NONE -> cctyp=empty
 last_value(cctyp) -> wf_cctyp
 nonempty(wf_cctyp) -> wftype
@@ -18,11 +27,14 @@ lcdftb=True -> wftype='LC-DFTB2 (or 3)'
 gbasis=DFTB -> SCF_energy=empty
 dftb_energy -> final_SCF_energy
 nonempty(SCF_energy) -> final_SCF_energy
-last_value(final_SCF_energy) -> scf_e
+last_value(final_SCF_energy) -> P_scf_e
 
 gbasis=DFTB -> gbasis='minimal basis set'
-last_value(new_step) -> opt_iter
 runtyp=ENERGY -> JobType=sp
+
+tddft=T -> JobType='TD-DFT'
+
+last_value(new_step) -> opt_iter
 # runtyp=XXX -> JobType=irc
 # runtyp=XXX -> JobType=scan
 # runtyp=XXX -> JobType=td
@@ -30,57 +42,49 @@ runtyp=ENERGY -> JobType=sp
 runtyp=OPTIMIZE -> JobType=opt
 runtyp=freq -> JobType=freq
 
-last_value(solvent) -> final_solvent
-last_value(solv_model) -> final_solv_model
-last_value(sym) -> final_sym
-last_value(charge) -> final_charge
-last_value(mult) -> final_mult
-scftype=UHF -> open_shell=True
-
-## cityp=NONE -> cityp=''
-## dft=NONE -> dft=''
-
-## cctyp -> wftyp
-## cityp -> wftyp
-## dfttyp -> wftyp
-
-# BASIS
-# Too difficult to complete it here, use Python
-#igauss=0 -> igauss=empty
-#polar=none -> polar=empty
-
-#ndfunc=0 -> ndfunc=''
-#nffunc=0 -> nffunc=empty
-#diffsp=F -> diffsp=empty
-
-#basnam='' -> basnam=empty
-#npfnuc=0 -> npfunc=empty
-#diffs=F -> diffs=empty
-#basnam='' -> basnam=empty
-gbasis -> basis
+last_value(solvent) -> P_solvent
+last_value(solv_model) -> P_solv_model
+last_value(sym) -> P_sym
+last_value(charge) -> P_charge
+last_value(mult) -> P_mult
+scftype=UHF -> P_open_shell=True
     
-# XXX -> scf_done
-# XXX -> freq_temp
-# XXX -> freq_ent
-# XXX -> freq_zpe
-# XXX -> freq_G
-# XXX -> freqs
+ccsd_pTp_energy -> P_ccsd_pTp_energy
+T1_diagnostic -> P_T1_diagnostic
 # XXX -> frozen # geometrical parameters
 # XXX -> uv # (lambda, fosc pairs)
 # latest(new_step) -> opt_iter
-## max_force -> max_force
-## rms_force -> rms_force
-## max_displacement -> max_displacement
-## rms_displacement -> rms_displacement
 # 
-## geom -> series
 #charges -> atprops
 
 is_geom_ang='True' -> geom_bohr='empty' # if geometry is available in Angstroms, ignore that in bohrs
 nonempty(geom_bohr) -> geom            # if geometry in Bohrs was not ignored, use it
 
-join_unique(JobType) -> final_jobtype
-# aggregate_after(opt_ok) -> opt_process # use new_step as separator for the geometry optimization steps
+scf_notconv -> P_scf_notconv
+scf_progress -> P_scf_progress
+
+S2 -> P_S2
+
+opt_ok -> P_opt_ok
+geom_bohr -> P_geom_bohr
+geom -> P_geom
+max_force -> P_max_force
+rms_force -> P_rms_force
+vibrations -> P_vibrations # vibration vectors
+freqs -> P_freqs # in cm-1
+
+thermo_temp -> P_thermo_temp
+thermo_e_corr -> P_thermo_e_corr
+thermo_h_corr -> P_thermo_h_corr
+thermo_g_corr -> P_thermo_g_corr
+thermo_units -> P_thermo_units
+
+term_ok -> P_term_ok
+join_unique(JobType) -> P_jobtype
+wftype -> P_wftype
+gbasis -> P_basis
+wftype_fragment -> P_wftype_fragment # e.g. FMO
+
 aggregate_before(scan) -> scan # use new_step as separator for the geometry optimization steps
 aggregate_before(irc) -> irc # use new_step as separator for the geometry optimization steps
 aggregate_before(new_step) -> opt # use new_step as separator for the geometry optimization steps

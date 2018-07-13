@@ -57,7 +57,6 @@ if do_profiling:
 
 # Top priority
 # TODO Support ORCA
-# TODO Add backup functionality
 # TODO Support JVXL format
 # TODO show TDDFT orbitals involved in excitation
 # TODO Write a python script to parallelize cubegen

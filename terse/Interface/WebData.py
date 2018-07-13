@@ -26,23 +26,23 @@ class WebData(Top):
 
     def webdata_opt(self, opt):
         b1=b2=''
-        opt_ok = opt.last_value('opt_ok')
+        opt_ok = opt.last_value('P_opt_ok')
         geoms = []
         if self.settings.FullGeomInfo or opt_ok!='True':
             # prepare geoms for web
             for opt_step in opt.data[1:]:
                 G = Geom() # the only reason we use Geom() is that because it is compatible with XYZ().write
-                G.prepare_for_web(geom=opt_step.last_value('geom'), bohr_units=(opt_step.last_value('geom_bohr') != 'empty'))
+                G.prepare_for_web(geom=opt_step.last_value('P_geom'), bohr_units=(opt_step.last_value('P_geom_bohr') != 'empty'))
                 geoms.append(G)
 
             # prepare convergence criteria
             convergence = {'max_force':[],'rms_force':[],'max_displacement':[],'rms_displacement':[]}
             for cnv_type in convergence.keys():
                 convergence[cnv_type] = \
-                    [opt_step.last_value(cnv_type) for opt_step in opt.data[1:] if opt_step.last_value(cnv_type) is not None]
+                    [opt_step.last_value('P_'+cnv_type) for opt_step in opt.data[1:] if opt_step.last_value('P_'+cnv_type) is not None]
 
             # save the convergence plot
-            convergence = {k: v for k, v in convergence.items() if len(v) > 0}  # remove absent convergence criteria
+            convergence = {k:v for k,v in convergence.items() if len(v) > 0}  # remove absent convergence criteria
             if len(convergence)>0:
                 (ylab, yval) = zip(*convergence.items())  # reshape them
                 plt = Plot(fname='-opt-conv.png', xlab='x', ylab='Convergence', legend=ylab, x=None, y=yval)
@@ -53,14 +53,14 @@ class WebData(Top):
             labeltext = 'Geometry optimization, step @{_modelNumber}'
         else:
             G = Geom()
-            G.prepare_for_web(geom=opt.last_value('geom'), bohr_units=(opt.last_value('geom_bohr') != 'empty'))
+            G.prepare_for_web(geom=opt.last_value('P_geom'), bohr_units=(opt.last_value('P_geom_bohr') != 'empty'))
             geoms.append(G)
             labeltext = 'Optimized geometry'
         # save geoms into XYZ and produce a path to it
         webpath = XYZ().write(fname='.xyz',geoms=geoms,vectors=False)
 
         if opt_ok != 'True':
-            b2 += Tools.HTML.color('Geometry optimization is not complete!','err')
+            b2 += Tools.HTML.brn + Tools.HTML.color('Geometry optimization is incomplete!','err')
 
         # produce HTML code
         load_command  = self.we.jmol_load_file(webpath)
@@ -82,19 +82,19 @@ class WebData(Top):
         P = freq.data[-1]
 
         G = Geom()
-        G.prepare_for_web(geom=P.last_value('geom'), bohr_units=(P.last_value('geom_bohr') != 'empty'))
+        G.prepare_for_web(geom=P.last_value('P_geom'), bohr_units=(P.last_value('P_geom_bohr') != 'empty'))
 
         # Reformat frequencies; TODO do it in processing
         vibs = []
-        if P.get_value('vibrations') is not None:
-            for vs in P.get_value('vibrations'):
+        if P.get_value('P_vibrations') is not None:
+            for vs in P.get_value('P_vibrations'):
                 for v in zip(*vs):
                     vibs.append(misc.split(v, 3))
 
         im_freq = False
-        if P.last_value('freqs') is not None:
+        if P.last_value('P_freqs') is not None:
             # TODO move to processing
-            freqs_cm = [float(fr[0]) for fr in P.last_value('freqs')]
+            freqs_cm = [float(fr[0]) for fr in P.last_value('P_freqs')]
 
             b2 += Tools.HTML.br + "Freqs: "
 
@@ -129,17 +129,16 @@ class WebData(Top):
             b2 += Tools.HTML.brn + Tools.HTML.color('Imaginary Freq(s) found!', 'imag')
             b1 += self.we.html_vibration_switch() + Tools.HTML.brn
 
-        T = freq.get_value('thermo_temp')
-        E_corr = freq.get_value('thermo_e_corr')
-        H_corr = freq.get_value('thermo_h_corr')
-        G_corr = freq.get_value('thermo_g_corr')
-        thermo_units = freq.last_value('thermo_units')
+        T = freq.get_value('P_thermo_temp')
+        E_corr = freq.get_value('P_thermo_e_corr')
+        H_corr = freq.get_value('P_thermo_h_corr')
+        G_corr = freq.get_value('P_thermo_g_corr')
+        thermo_units = freq.last_value('P_thermo_units')
         if E_corr:
             b2 += Tools.HTML.br + Tools.HTML.tag("Thermochemical corrections:", "strong")
             for v in zip(*[T,E_corr,H_corr,G_corr]):
                 b2 += Tools.HTML.br + "T=%s: E= %s, H= %s, G= %s " % v
                 b2 += "(%s)\n" % thermo_units
-
         return (b1,b2)
 
     def webdata_sp(self, sp):
@@ -147,7 +146,7 @@ class WebData(Top):
 
         geoms = []
         G = Geom()
-        G.prepare_for_web(geom=sp.last_value('geom'), bohr_units=(sp.last_value('is_geom_bohr') == 'True'))
+        G.prepare_for_web(geom=sp.last_value('P_geom'), bohr_units=(sp.last_value('P_geom_bohr') != 'empty'))
         geoms.append(G)
 
         # save geoms into XYZ and produce a path to it
@@ -161,10 +160,10 @@ class WebData(Top):
         b1 += 'Single Point step: '
         b1 += self.we.html_button(load_command,'Energy') + Tools.HTML.brn
 
-        if sp.last_value('scf_notconv')== 'True' or sp.last_value('term_ok')!= 'True':
+        if sp.last_value('P_scf_notconv')== 'True' or sp.last_value('P_term_ok')!= 'True':
 
             # save the convergence plot
-            scf_progress = sp.last_value('scf_progress')
+            scf_progress = sp.last_value('P_scf_progress')
             if scf_progress is not None and len(scf_progress)>0:
                 if isinstance(scf_progress[0],list):
                     scf_progress = [i[0] for i in scf_progress]
@@ -189,7 +188,7 @@ class WebData(Top):
         b2 = ''
 
         P = self.processed
-        jobtype = P.last_value('final_jobtype')
+        jobtype = P.last_value('P_jobtype')
 
         # jobtype
         if not jobtype:
@@ -200,48 +199,48 @@ class WebData(Top):
         else:
             sx = jobtype.upper()
         sx = Tools.HTML.br + Tools.HTML.tag(sx, 'strong')
-        if P.last_value('term_ok')== 'True':
+        if P.last_value('P_term_ok')== 'True':
             b2 += sx
         else:
             b2 += Tools.HTML.color(sx, 'err')
 
         # level of theory
-        lot = '%s/%s' % (P.last_value('wftype'), P.last_value('basis'))
+        lot = '%s/%s' % (P.last_value('P_wftype'), P.last_value('P_basis'))
         b2 += Tools.HTML.br + Tools.HTML.color(lot.upper(), 'lot')
 
         # level of theory, additional record
-        if P.last_value('wftype_fragment') is not None:
-            lot2 = 'Fragmentation scheme: ' + P.last_value('wftype_fragment')
+        if P.last_value('P_wftype_fragment') is not None:
+            lot2 = 'Fragmentation scheme: ' + P.last_value('P_wftype_fragment')
             b2 += Tools.HTML.br + Tools.HTML.color(lot2, 'lot')
 
         # symmetry, charge, multiplicity
-        b2 += Tools.HTML.br + "Symmetry: %s\n" % P.last_value('final_sym')
-        b2 += Tools.HTML.br + "Charge: %s; " % P.last_value('final_charge')
-        b2 += "Mult: %s\n"  % P.last_value('final_mult')
+        b2 += Tools.HTML.br + "Symmetry: %s\n" % P.last_value('P_sym')
+        b2 += Tools.HTML.br + "Charge: %s; " % P.last_value('P_charge')
+        b2 += "Mult: %s\n"  % P.last_value('P_mult')
 
         # open shell, s2
-        if P.last_value('open_shell')== 'True':
-                b2 += Tools.HTML.br + "Open Shell; S2= %s,\n" % P.last_value('S2')
+        if P.last_value('P_open_shell')== 'True':
+                b2 += Tools.HTML.br + "Open Shell; S2= %s,\n" % P.last_value('P_S2')
 
         # last_value SCF energy
         try:
-            b2 += Tools.HTML.br + "Last SCF Energy= %-11.6f\n" % float(P.last_value('scf_e'))
+            b2 += Tools.HTML.br + "Last SCF Energy= %-11.6f\n" % float(P.last_value('P_scf_e'))
         except TypeError:
             b2 += Tools.HTML.br + "Last SCF Energy N/A\n"
 
-        if P.last_value('scf_notconv')== 'True':
+        if P.last_value('P_scf_notconv')== 'True':
             b2 += Tools.HTML.br + Tools.HTML.color('SCF did not converge!', 'err')
 
-        if P.last_value('final_solvent') is not None:
+        if P.last_value('P_solvent') is not None:
             sx = 'Solvation: '
-            if P.last_value('final_solv_model') is not None:
-                sx += '%s(%s)' % (P.last_value('final_solv_model'), P.last_value('final_solvent'))
+            if P.last_value('P_solv_model') is not None:
+                sx += '%s(%s)' % (P.last_value('P_solv_model'), P.last_value('P_solvent'))
             b2 += Tools.HTML.br + Tools.HTML.tag(sx, 'lot')
 
-        if P.last_value('ccsd_pTp_energy') is not None:
-            b2 += Tools.HTML.br + "Last CCSD(T) Energy= %-11.6f\n" % float(P.last_value('ccsd_pTp_energy'))
-            if P.last_value('T1_diagnostic') is not None:
-                T1 = float(P.last_value('T1_diagnostic'))
+        if P.last_value('P_ccsd_pTp_energy') is not None:
+            b2 += Tools.HTML.br + "Last CCSD(T) Energy= %-11.6f\n" % float(P.last_value('P_ccsd_pTp_energy'))
+            if P.last_value('P_T1_diagnostic') is not None:
+                T1 = float(P.last_value('P_T1_diagnostic'))
                 s_T1 = "T1 diagnostic= %.3f\n" % T1
                 if T1 >= 0.025:
                     s_T1 = Tools.HTML.tag(s_T1, 'err')
@@ -269,7 +268,7 @@ class WebData(Top):
         else:
             P = P.data[0]
 
-        if 'freq' in jobtype:
+        if 'freq' in jobtype and not ('opt' in jobtype and P.last_value('P_opt_ok')!='True'):
             (s_b1, s_b2) = self.webdata_freq(P)
             b1 += s_b1
             b2 += s_b2

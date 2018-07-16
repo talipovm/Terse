@@ -2,6 +2,30 @@ from Top import Top
 import logging
 log = logging.getLogger(__name__)
 
+
+br = '<br />'
+
+brn = '<br />\n'
+
+def tag(s, t, intag=''):
+    shifted = ''
+    indent = '    '
+    for line in str(s).split("\n"):
+        shifted += indent+line+"\n"
+    return "<%(tag)s %(intag)s>\n%(tagbody)s</%(tag)s>\n" % {'tag': t, 'intag': intag, 'tagbody': shifted}
+
+def img(source,width='450'):
+    return "<img src='%s' width=%s\n"  % (source,str(width))
+
+def color(s, col_type):
+    from Top import Top
+    tp = Top()
+    return tag(s,"SPAN style='color:%s'" % (tp.settings.color[col_type]))
+
+def strong(s):
+    return tag(s,'strong')
+
+
 class HTML(Top):
     def __init__(self):
         self.s = ''
@@ -45,35 +69,8 @@ class HTML(Top):
             }
         return self.s % d
 
-
-def tag(s, t, intag=''):
-    shifted = ''
-    indent = '    '
-    for line in str(s).split("\n"):
-        shifted += indent+line+"\n"
-    return "<%(tag)s %(intag)s>\n%(tagbody)s</%(tag)s>\n" % {'tag': t, 'intag': intag, 'tagbody': shifted}
-
-
 if __name__ == "__main__":
     h = HTML()
     from Settings import Settings
     h.settings = Settings()
     tr = tag('abcd', 'tr')
-
-    # This code is outdated!
-    h.makeHeader()
-    h.makeLine('abc','def')
-    h.makeTail()
-    print(h)
-br = '<br />'
-brn = '<br />\n'
-
-
-def img(source,width='450'):
-    return brn + "<img src='%s' width=%s\n"  % (source,str(width)) + brn
-
-
-def color(s, col_type):
-    from Top import Top
-    tp = Top()
-    return tag(s,"SPAN style='color:%s'" % (tp.settings.color[col_type]))

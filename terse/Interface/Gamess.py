@@ -7,9 +7,9 @@ if __name__ == "__main__":
 
 from Tools.file2 import file2
 from ElectronicStructure import ElectronicStructure
-from Interface.Processing import Processing
+from Processing.Processing import Processing
 from Grammar.Grammar import Grammar
-from Interface.WebData import WebData
+from ReportGenerator.ReportGenerator import ReportGenerator
 import os.path
 
 import logging
@@ -83,8 +83,8 @@ class Gamess(ElectronicStructure):
         """
         Returns 2 strings with HTML code
         """
-        W = WebData(processed=self.P.parsed)
-        return W.produce_html_code()
+        W = ReportGenerator(processed=self.P.parsed)
+        return W.report()
 
 #    def usage(self):
 #        for step in self.steps:

@@ -1,13 +1,8 @@
-if __name__ == "__main__":
-    import sys
-
-    sys.path.append('..')
-
 import subprocess
 import os
 from itertools import compress
 from Top import Top
-from Tools.conversions import is_number
+from Tools.misc import is_number
 
 import logging
 log = logging.getLogger(__name__)
@@ -211,6 +206,9 @@ class Plot(Top):
 
 
 if __name__ == "__main__":
+    import sys
+    sys.path.append('..')
+
     from Settings import Settings
     Top.settings = Settings()
 

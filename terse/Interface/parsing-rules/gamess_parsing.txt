@@ -31,6 +31,10 @@ if [0]' SCF IS UNCONVERGED, TOO MANY ITERATIONS':
     scf_notconv = 'True'
 endif
 
+if [0]'          DENSITY CONVERGED':
+    scf_done = 'True'
+endif
+
 # FMO
 if [0]'                  The Fragment Molecular Orbital (FMO) method':
     fmo = 'True'

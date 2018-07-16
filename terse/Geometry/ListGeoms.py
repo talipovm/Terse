@@ -10,7 +10,7 @@ if __name__ == "__main__":
     sys.path.append(dirpath)
 
 import logging
-from Tools.plot import Plot
+from ReportComponents.Plot import Plot
 from Top import Top
 import Interface.XYZ
 
@@ -122,13 +122,8 @@ class ListGeoms(Top):
         return: merged string with comments
         rtype: string
         """
-
-        r = ''
-        for g in self.geoms:
-            if g.comment.strip():
-                r += g.comment + Tools.HTML.br
-        return r
-
+        out = [g.comment for g in self.geoms if g.comment.strip()]
+        return Tools.HTML.br.join(out) + Tools.HTML.br
 
     def consistencyCheck(self):
         """
@@ -137,8 +132,7 @@ class ListGeoms(Top):
         """
 
         g0 = self[0]
-        for i in range(len(self.geoms)):
-            g = self.geoms[i]
+        for i,g in enumerate(self.geoms):
             if g.header_natoms != len(g.coord):
                 log.warning('Number of atoms in header in geometry %i does not match to actual value' % (i+1))
                 return False
@@ -146,7 +140,6 @@ class ListGeoms(Top):
                 log.warning('Number of atoms in models 1 and %i is not the same' % (i+1))
                 return False
         return True
-
 
     def plot(self,xlabel='Scan point',ylabel='',x=None,y=None):
         io = Plot()
@@ -157,7 +150,6 @@ class ListGeoms(Top):
         plt = Plot('.png', xlab=xlabel, ylab=ylabel, x=x, y=y)
         plt.save_plot()
         return Tools.HTML.img(plt.web_path)
-
 
     def extrema(self,title='Min/Max points:',yg=None,naround=3,show_min=True,show_max=True,frame_names = None, frame_prefix='Point '):
         """

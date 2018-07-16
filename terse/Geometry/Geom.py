@@ -3,7 +3,6 @@ log = logging.getLogger(__name__)
 
 from Top import Top
 import Interface.XYZ
-from Tools.ChemicalInfo import BohrR
 
 class Geom(Top):
 
@@ -115,19 +114,7 @@ class Geom(Top):
                     # Remove parsed parameter from comment
                     #new_comment = re.sub('%s\s*%s\s*%s'%(arg,delim,val),'',new_comment).strip() # TODO figure out later how to make it work with variables containing parentheses
                     self.comment = ''
-                #self.comment += new_comment.strip() 
-
-    # new method
-    def prepare_for_web(self,geom,bohr_units=False):
-        if geom is None:
-            return None
-        if bohr_units:
-            for crd in geom:
-                s = '%s %.12f %.12f %.12f' % (crd[0],float(crd[1])*BohrR, float(crd[2])*BohrR, float(crd[3])*BohrR)
-                self.coord.append(s)
-        else:
-            self.coord = [' '.join(coords) for coords in geom]
-
+                #self.comment += new_comment.strip()
 
     def write(self,fname,vectors=None):
         """

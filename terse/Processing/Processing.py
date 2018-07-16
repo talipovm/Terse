@@ -1,16 +1,13 @@
 import re
 from Top import Top
-from Tools.misc import strip_all
+from Tools.misc import strip_all,unquote_if_quoted
 import pickle
 
 import logging
 log = logging.getLogger(__name__)
 
-if __name__ == "__main__":
-    import sys
-    sys.path.append('..')
-
 class Processing(Top):
+
     def __init__(self, PI=None, parsed=None):
         super().__init__()
         self.PI = PI
@@ -74,21 +71,17 @@ class Processing(Top):
         s_re = re.search(r'\s*(\S.*\S)\s*->\s*(\S.*\S)\s*', s)
         if s_re is None:
             raise SyntaxError
-        #
+
         old_key, new_key = s_re.groups()
         old_value = new_value = None
-        #
+
         if '=' in old_key:
             old_key, old_value = strip_all(old_key.split('='))
-            if old_value[0] + old_value[-1] == "\'\'":
-                old_value = old_value[1:-1]
+            old_value = unquote_if_quoted(old_value)
         if '=' in new_key:
             new_key, new_value = strip_all(new_key.split('='))
-            if new_value[0]+new_value[-1]=="\'\'":
-                new_value = new_value[1:-1]
-        #
+            new_value = unquote_if_quoted(new_value)
         self.parsed.conditionally_add(old_key=old_key, new_key=new_key, old_value=old_value, new_value=new_value)
-        return
 
     def process_command(self, s):
         """
@@ -136,6 +129,9 @@ class Processing(Top):
         return
 
 if __name__ == "__main__":
+    import sys
+
+    sys.path.append('..')
     from Settings import Settings
     Top.settings = Settings()
     Top.settings.detailed_print = True

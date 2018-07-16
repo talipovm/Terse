@@ -52,3 +52,16 @@ def get_range(s):
             i = int(s_element)
             v_res.append(i)
     return v_res
+
+def unquote_if_quoted(s):
+    if s[0]==s[-1] == "\'":
+        return s[1:-1]
+    else:
+        return s
+
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False

@@ -81,12 +81,9 @@ class IRC(ListGeoms):
             #s += textirc(self.x,self.ces)
         return s
 
-
     def textirc(self,xs,ys):
-        s = ''
-        for x,y in zip(xs,ys):
-            s += "%.3f %.2f\n" % (x, y) + Tools.HTML.br
-        return s
+        out = ["%.3f %.2f" % rw + Tools.HTML.br for rw in zip(xs,ys)]
+        return "\n".join(out)
 
 
     def textDirection(self):
@@ -95,7 +92,6 @@ class IRC(ListGeoms):
             return 'Reverse + Forward'
         else:
             return irc_dir[self.direction]
-
 
     def normalizeGradients(self,mx):
         if max(self.grad)>0:

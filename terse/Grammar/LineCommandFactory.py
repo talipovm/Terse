@@ -30,6 +30,7 @@ class LineCommandFactory(Top):
 
         if CmdClass is None:
             raise SyntaxError
+
         self.cmd = CmdClass(self.GI, self.FI, self.fn, self.parsed_container, s)
 
     def execute(self):

@@ -39,9 +39,7 @@ class Functions(Top):
         :param s:
         :return:
         """
-        # Construct a list with the latest values of self.parsed of int type
         c = Calculator(get_params=lambda x: int(self.get_params(x)))
-
         try:
             out = c.ev(s)
         except:
@@ -74,14 +72,8 @@ class Functions(Top):
         :param s:
         :return:
         """
-        v_res = get_range(s)
-        #
         fields = strip_all(self.FI.s.split())
-        #
-        res = []
-        for v in v_res:
-            res.append(fields[v-1])
-        return res
+        return [fields[v-1] for v in get_range(s)]
 
     def parse(self, s_function):
         s=''

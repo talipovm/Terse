@@ -60,7 +60,9 @@ T1_diagnostic -> P_T1_diagnostic
 is_geom_ang='True' -> geom_bohr='empty' # if geometry is available in Angstroms, ignore that in bohrs
 nonempty(geom_bohr) -> geom            # if geometry in Bohrs was not ignored, use it
 
-scf_notconv -> P_scf_notconv
+last_value(scf_done) -> P_scf_done
+scf_notconv='True' -> P_scf_done='False'
+
 scf_progress -> P_scf_progress
 
 S2 -> P_S2

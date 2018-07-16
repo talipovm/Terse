@@ -160,8 +160,7 @@ class XYZ(Top):
                 log.warning('writeXYZ: Several geometries found; turning Vibrations off')
                 vectors = None
 
-        for i in range(len(geoms)):
-            geom = geoms[i]
+        for geom in geoms:
             if isinstance(geom, list):
                 comment = ''
             else:

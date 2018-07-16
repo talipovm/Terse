@@ -1,7 +1,7 @@
 import Tools.HTML
 from Top import Top
-from Tools.plot import Plot
-from Geometry import IRC,ListGeoms,Scan
+from ReportComponents.Plot import Plot
+from Geometry import ListGeoms
 
 import logging
 log = logging.getLogger(__name__)

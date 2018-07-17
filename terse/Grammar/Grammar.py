@@ -4,9 +4,14 @@ from Grammar.GlobalCommand import GlobalCommand
 from Containers.ParsedStructure import ParsedContainer, ParsedElement
 from Grammar.Functions import Functions
 from collections import defaultdict
-from Tools.trie import Trie
-# import datrie
-# import string
+
+use_datrie = False
+if use_datrie:
+    import datrie
+    import string
+else:
+    from Tools.trie import Trie
+
 
 import logging
 log = logging.getLogger(__name__)
@@ -28,15 +33,17 @@ class Grammar(Top):
         self.patterns0 = None
 
         self.init_grammar()
-        self.trie = Trie(self.patterns0)
         self.patterns_pos = self.patterns['substring with position']
         self.patterns_regex = self.patterns['regex']
 
-        #self.datrie = datrie.Trie(string.printable)
-        #for w,p in self.patterns0.items():
-        #    self.datrie[w] = p
-
-        self.find = self.find_trie
+        if use_datrie:
+            self.datrie = datrie.Trie(string.printable)
+            for w,p in self.patterns0.items():
+                self.datrie[w] = p
+            self.find = self.find_datrie
+        else:
+            self.trie = Trie(self.patterns0)
+            self.find = self.find_trie
 
     def init_grammar(self):
         self.patterns = defaultdict(list)

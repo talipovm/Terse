@@ -76,7 +76,6 @@ class Functions(Top):
         return [fields[v-1] for v in get_range(s)]
 
     def parse(self, s_function):
-        s=''
         if s_function[0] + s_function[-1] == '//':
             i, j = 1, -1
             return 'regex',self.function_regexp(s_function[i:j])

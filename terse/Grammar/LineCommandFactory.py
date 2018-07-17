@@ -1,6 +1,10 @@
 
 from Top import Top
 import re
+from Grammar.Command_If import Command_If
+from Grammar.Command_Jump import Command_Jump
+from Grammar.Command_Table import Command_Table
+from Grammar.Command_Assign import Command_Assign
 
 
 class LineCommandFactory(Top):
@@ -14,18 +18,14 @@ class LineCommandFactory(Top):
 
         CmdClass = None
         if s[:2]=='if':
-            from Grammar.Command_If import Command_If
             CmdClass = Command_If
         elif s[:4]=='jump':
-            from Grammar.Command_Jump import Command_Jump
             CmdClass = Command_Jump
         elif s[:5]=='table':
-            from Grammar.Command_Table import Command_Table
             CmdClass = Command_Table
         elif s[:12]=='space_filler':
             CmdClass = Command_Spacefiller
         elif '=' in s:
-            from Grammar.Command_Assign import Command_Assign
             CmdClass = Command_Assign
 
         if CmdClass is None:
@@ -34,8 +34,7 @@ class LineCommandFactory(Top):
         self.cmd = CmdClass(self.GI, self.FI, self.fn, self.parsed_container, s)
 
     def execute(self):
-        if self.cmd is not None:
-            return self.cmd.execute()
+        return self.cmd.execute()
 
 class Command_Spacefiller(Top):
     def __init__(self, GI, FI, fn, parsed_container, s):

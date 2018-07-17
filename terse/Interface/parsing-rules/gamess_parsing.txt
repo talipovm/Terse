@@ -265,4 +265,8 @@ if [0]'          TOTAL MULLIKEN AND LOWDIN ATOMIC POPULATIONS':
     endtable
 endif
 
+if [0]' RHF      monomer':
+    jump ' Dipole moment D'
+endif
+
 # vim: filetype=awk

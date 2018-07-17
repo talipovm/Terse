@@ -46,6 +46,15 @@ class file2(io.TextIOWrapper):
         for _ in range(n):
             next(self)
 
+    def skip_until_string(self, pattern):
+        while not (pattern in self.s):
+            next(self)
+
+    def skip_until_regex(self, pattern):
+        z = re.compile(pattern)
+        while not z.search(self.s):
+            next(self)
+
     def skip_until(self, pattern, offset=0, regexp=False):
         """
         Skip the file lines until a pattern is found.
@@ -68,11 +77,11 @@ class file2(io.TextIOWrapper):
             else:
                 ps = pattern
             while instance_hit is None:
-                for i in range(len(ps)):
+                for i,p in enumerate(ps):
                     if regexp:
-                        hit = re.search(ps[i], self.s)
+                        hit = re.search(p, self.s)
                     else:
-                        hit = (ps[i] in self.s)
+                        hit = (p in self.s)
                     if hit:
                         instance_hit = i
                         break

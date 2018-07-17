@@ -22,5 +22,7 @@ class Command_Jump(Top):
         if expr_type=='numeric_expression':
             n = int(vals[0])
             self.FI.skip_n(n)
-        if expr_type=='regex':
-            self.FI.skip_until(pattern=self.s_function[1:-1], regexp=True)
+        elif expr_type=='regex':
+            self.FI.skip_until_regex(pattern=self.s_function[1:-1])
+        elif expr_type=='string':
+            self.FI.skip_until_string(pattern=vals[0])

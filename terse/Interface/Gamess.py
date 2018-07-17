@@ -4,7 +4,6 @@ if __name__ == "__main__":
     print("Append to PYTHONPATH: %s" % (append_path))
     sys.path.append(append_path)
 
-
 from Tools.file2 import file2
 from ElectronicStructure import ElectronicStructure
 from Processing.Processing import Processing
@@ -36,17 +35,8 @@ class Gamess(ElectronicStructure):
         Parses GAMESS file
         """
 
-        try:
-            GI = file2(self.parsing_filename)
-            log.debug('%s with instructions for parsing was opened for reading' % self.parsing_filename)
-        except:
-            log.error('Cannot open %s for reading' % self.parsing_filename)
-
-        try:
-            FI = file2(self.file)
-            log.debug('%s was opened for reading' %(self.file))
-        except:
-            log.error('Cannot open %s for reading' %(self.file))
+        GI = file2(self.parsing_filename)
+        FI = file2(self.file)
 
         if not use_old_pickle:
             G = Grammar(GI, FI)

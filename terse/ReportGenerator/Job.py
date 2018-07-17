@@ -111,7 +111,7 @@ class Job(Top_ReportGenerator):
             return self.get_cells()
 
         # P is wrapped in the aggregation order: scan > irc > opt;
-        for name,Gen in {'scan':Scan,'irc':IRC,'opt':Opt}.items():
+        for name,Gen in zip(('scan','irc','opt'),(Scan,IRC,Opt)):
             if name in jobtype:
                 self.add_both(Gen(self.we, P).report())
             else:

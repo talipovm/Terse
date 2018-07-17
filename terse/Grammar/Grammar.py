@@ -5,21 +5,15 @@ from Containers.ParsedStructure import ParsedContainer, ParsedElement
 from Grammar.Functions import Functions
 from collections import defaultdict
 
+import logging
+log = logging.getLogger(__name__)
+
 use_datrie = False
 if use_datrie:
     import datrie
     import string
 else:
     from Tools.trie import Trie
-
-
-import logging
-log = logging.getLogger(__name__)
-
-if __name__ == "__main__":
-    import sys
-    sys.path.append('..')
-
 
 class Grammar(Top):
     def __init__(self, GI=None, FI=None):

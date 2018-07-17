@@ -1,8 +1,10 @@
 from ReportGenerator.Geom import Geom
 from ReportComponents.Plot import Plot
-from Interface.XYZ import XYZ
 from ReportGenerator.Top import Top_ReportGenerator
 from ReportComponents.WebFile import WebFile
+
+import logging
+log = logging.getLogger(__name__)
 
 class Opt(Top_ReportGenerator):
     def __init__(self,we,parsed):
@@ -28,8 +30,9 @@ class Opt(Top_ReportGenerator):
             s = 'P_'+cnv_type
             conv[cnv_type] = [o.last_value(s) for o in self.parsed.data[1:] if o.last_value(s) is not None]
         conv = {k:v for k,v in conv.items() if len(v) > 0}  # remove absent convergence criteria
-        if not conv:
+        if len(conv)==0:
             self.do_opt_progress = False
+            log.debug('Did not find any convergence criteria for plotting')
         else:
             (self.ylab, self.yval) = zip(*conv.items())  # reshape them
 

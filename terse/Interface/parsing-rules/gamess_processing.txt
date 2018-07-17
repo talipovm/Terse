@@ -34,7 +34,6 @@ runtyp=ENERGY -> JobType=sp
 
 tddft=T -> JobType='TD-DFT'
 
-last_value(new_step) -> opt_iter
 # runtyp=XXX -> JobType=irc
 # runtyp=XXX -> JobType=scan
 # runtyp=XXX -> JobType=td
@@ -87,9 +86,11 @@ wftype -> P_wftype
 gbasis -> P_basis
 wftype_fragment -> P_wftype_fragment # e.g. FMO
 
+last_value(new_step) -> P_opt_iter
+# join_unique(new_step) -> steps
+
 aggregate_before(scan) -> scan # use new_step as separator for the geometry optimization steps
 aggregate_before(irc) -> irc # use new_step as separator for the geometry optimization steps
 aggregate_before(new_step) -> opt # use new_step as separator for the geometry optimization steps
-join_unique(new_step) -> steps
 
 # vim: filetype=R

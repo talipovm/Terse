@@ -5,6 +5,7 @@ from ReportGenerator.Scan import Scan
 from ReportGenerator.IRC import IRC
 from ReportGenerator.Freq import Freq
 from ReportGenerator.Opt import Opt
+from ReportGenerator.NoJobType import NoJobType
 from ReportGenerator.SinglePoint import SinglePoint
 from ReportGenerator.Top import Top_ReportGenerator
 
@@ -108,6 +109,7 @@ class Job(Top_ReportGenerator):
         P = self.parsed
         jobtype = P.last_value('P_jobtype')
         if not jobtype:
+            self.add_both(NoJobType(self.we, P).report())
             return self.get_cells()
 
         # P is wrapped in the aggregation order: scan > irc > opt;

@@ -14,7 +14,7 @@ class Opt(Top_ReportGenerator):
     def prepare_for_report(self):
         self.opt_ok = (self.parsed.last_value('P_opt_ok')=='True')
         self.do_opt_progress = self.settings.FullGeomInfo or not self.opt_ok
-        self.bohr_units = self.parsed.last_value('P_geom_bohr') != 'empty'
+        self.n_steps = self.parsed.last_value('P_opt_iter')
 
         if self.do_opt_progress:
             self.prepare_opt_convergence()
@@ -43,6 +43,9 @@ class Opt(Top_ReportGenerator):
             return self.img_tag(plt.web_path)
         else:
             return 'Not enough data to produce convergence plot'
+
+    def opt_steps(self):
+        return "Steps: %s" % self.n_steps
 
     def save_geom(self):
         v = [str(Geom(self.we,g)) for g in self.parsed_g]
@@ -85,6 +88,9 @@ class Opt(Top_ReportGenerator):
                 self.add_left(self.br_tag)
         else:
             self.add_left(self.color_tag('No coordinates found!','err'))
+
+        self.add_right(self.opt_steps())
+        self.add_right(self.br_tag)
 
         if not self.opt_ok:
             self.add_right(self.color_tag('Incomplete geometry optimization!','err'))

@@ -1,28 +1,34 @@
 import re
+from Grammar.Top_Grammar import Top_Grammar
+from Grammar.Functions import ExpressionFactory
 
-from Top import Top
+import logging
+log = logging.getLogger(__name__)
 
+class Command_Jump(Top_Grammar):
+    def __init__(self, GI, FI, parsed_container, troublemakers):
+        super().__init__(GI, FI, parsed_container, troublemakers)
 
-class Command_Jump(Top):
-    def __init__(self, GI, FI, fn, parsed_container, s):
-        super().__init__()
-        self.GI = GI
-        self.FI = FI
-        self.fn = fn
-        self.parsed_container = parsed_container
-
+        s = self.GI.s
         s_re = re.search(r'jump\s*(.*)', s) # syntax "if /xxx/:"
         if s_re is None:
             raise SyntaxError
 
         self.s_function = s_re.group(1)
+        self.f = ExpressionFactory(self.s_function,f_get_params=self.parsed_container.last_value).assign()
 
     def execute(self):
-        expr_type,vals = self.fn.parse(self.s_function)
+        expr_type = self.f.type
         if expr_type=='numeric_expression':
-            n = int(vals[0])
-            self.FI.skip_n(n)
-        elif expr_type=='regex':
-            self.FI.skip_until_regex(pattern=self.s_function[1:-1])
-        elif expr_type=='string':
+            vals = self.f.get_value()
+            if vals:
+                n = int(vals[0])
+                self.FI.skip_n(n)
+            else:
+                log.debug('Numeric expression could not be evaluated')
+        elif expr_type == 'string':
+            vals = self.f.get_value()
             self.FI.skip_until_string(pattern=vals[0])
+        elif expr_type=='regex':
+            self.FI.skip_until_regex(pattern=self.f.pattern)
+

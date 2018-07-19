@@ -1,9 +1,8 @@
 import re
-from Top import Top
-from Grammar.GlobalCommand import GlobalCommand
-from Containers.ParsedStructure import ParsedContainer, ParsedElement
-from Grammar.Functions import Functions
+from Grammar.GlobalCommand import GlobalCommand_If, GlobalCommand_Troublemaker
+from Containers.ParsedStructure import ParsedContainer
 from collections import defaultdict
+from Grammar.Top_Grammar import Top_Grammar
 
 import logging
 log = logging.getLogger(__name__)
@@ -15,18 +14,16 @@ if use_datrie:
 else:
     from Tools.trie import Trie
 
-class Grammar(Top):
+class Grammar(Top_Grammar):
     def __init__(self, GI=None, FI=None):
-        super().__init__()
-        self.GI = GI
-        self.FI = FI
+        super().__init__(GI,FI,None,None)
         self.parsed_container = ParsedContainer()
-        self.fn = Functions(self.FI, self.parsed_container.last_value)
 
         self.patterns = None
         self.patterns0 = None
-
+        self.troublemakers = []
         self.init_grammar()
+
         self.patterns_pos = self.patterns['substring with position']
         self.patterns_regex = self.patterns['regex']
 
@@ -47,11 +44,14 @@ class Grammar(Top):
             if s.strip()=='':
                 continue
             if re.search('^if',s):
-                p = GlobalCommand(self.GI, self.FI, self.fn, self.parsed_container, s)
+                p = GlobalCommand_If(self.GI, self.FI, self.parsed_container, self.troublemakers)
                 if p.pattern_type=='substring with position 0':
                     self.patterns0[p.pattern] = p
                 else:
                     self.patterns[p.pattern_type].append(p)
+            elif re.search('^troublemaker',s):
+                p = GlobalCommand_Troublemaker(self.GI, self.FI)
+                self.troublemakers.append(p)
 
     def find_datrie(self, s):
         found = self.datrie.prefix_values(s)

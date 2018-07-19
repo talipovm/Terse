@@ -1,15 +1,13 @@
 import re
+from Grammar.Top_Grammar import Top_Grammar
+from Grammar.Functions import ExpressionFactory
 
-from Top import Top
+import logging
+log = logging.getLogger(__name__)
 
-
-class Command_If(Top):
-    def __init__(self, GI, FI, fn, parsed_container, s):
-        super().__init__()
-        self.GI = GI
-        self.FI = FI
-        self.fn = fn
-        self.parsed_container = parsed_container
+class Command_If(Top_Grammar):
+    def __init__(self, GI, FI, parsed_container, troublemakers):
+        super().__init__(GI, FI, parsed_container, troublemakers)
 
         self.pattern_type = None
         self.start = None
@@ -17,30 +15,15 @@ class Command_If(Top):
         self.pattern = None
         self.commands = []
 
-        self.preprocess(s)
+        self.preprocess(self.GI.s)
 
     def preprocess(self, s):
-        s_re = re.search(r'if\s+/(.*)/:', s) # syntax "if /xxx/:"
-        if s_re is not None:
-            self.pattern_type = 'regex'
-            self.pattern = re.compile(s_re.group(1))
-            self.commands = self.get_enclosed_commands()
-            return
-
-        s_re = re.search(r'if\s+\[(\S+)\]\'(.*)\':', s) # syntax "if [N]'xxx'"
-        if s_re is not None:
-            try:
-                start = int(s_re.group(1))
-                end = start + len(s_re.group(2))
-            except (ValueError,TypeError):
-                raise SyntaxError
-            self.pattern_type = 'substring with position'
-            self.start = start
-            self.end = end
-            self.pattern = s_re.group(2)
-            self.commands = self.get_enclosed_commands()
-            return
-        raise SyntaxError
+        s_GI = self.GI.s
+        s_re = re.search(r'if\s+(.*):', s_GI) # syntax "if /xxx/:"
+        if s_re is None:
+            raise SyntaxError
+        self.ptn = ExpressionFactory(s_re.group(1)).assign()
+        self.commands = self.get_enclosed_commands()
 
     def get_enclosed_commands(self):
         out = []
@@ -49,18 +32,12 @@ class Command_If(Top):
             if s[:5]=='endif':
                 break
             from Grammar.LineCommandFactory import LineCommandFactory # it has to be here to avoid import recursion
-            cmd = LineCommandFactory(self.GI, self.FI, self.fn, self.parsed_container, s)
+            cmd = LineCommandFactory(self.GI, self.FI, self.parsed_container, self.troublemakers).assign()
             out.append(cmd)
         return out
 
-    def find(self, s):
-        if self.pattern_type=='regex':
-            if self.pattern.search(s) is not None:
-                return True
-        if self.pattern_type=='substring with position':
-            if s[self.start:self.end]==self.pattern:
-                return True
-        return False
+    def find(self, s_FI):
+        return self.ptn.match(s_FI)
 
     def execute(self):
         if self.find(self.FI.s):

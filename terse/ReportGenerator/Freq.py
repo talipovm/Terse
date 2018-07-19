@@ -1,5 +1,5 @@
 from ReportGenerator.Geom import Geom
-from ReportGenerator.Top import Top_ReportGenerator
+from ReportGenerator.Top_ReportGenerator import Top_ReportGenerator
 from ReportComponents.WebFile import WebFile
 
 import logging

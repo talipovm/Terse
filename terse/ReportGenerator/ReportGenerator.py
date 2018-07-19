@@ -2,7 +2,7 @@ import logging
 log = logging.getLogger(__name__)
 
 from ReportGenerator.Job import Job
-from ReportGenerator.Top import Top_ReportGenerator
+from ReportGenerator.Top_ReportGenerator import Top_ReportGenerator
 
 class ReportGenerator(Top_ReportGenerator):
 

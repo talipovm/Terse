@@ -1,29 +1,27 @@
 import re
-
 from Containers.ParsedStructure import ParsedElement
 from Tools.misc import strip_all
-from Top import Top
+from Grammar.Top_Grammar import Top_Grammar
 
+import logging
+log = logging.getLogger(__name__)
 
-class Command_Table(Top):
-    def __init__(self, GI, FI, fn, parsed_container, s):
-        """
-            var_name,run_until=/REGEXP/ | run_while=/REGEXP/
-        (       LINE_BY_LINE_COMMAND\n)+
-        """
-        super().__init__()
-        self.GI = GI
-        self.FI = FI
-        self.fn = fn
-        self.parsed_container = parsed_container
+class Command_Table(Top_Grammar):
+    def __init__(self, GI, FI, parsed_container, troublemakers):
+        super().__init__(GI, FI, parsed_container, troublemakers)
         self.condition = None
         self.key = None
         self.mode = None
         self.commands = []
+
+        s = self.GI.s
         self.preprocess(s)
 
-
     def preprocess(self,s):
+        """
+            var_name,run_until=/REGEXP/ | run_while=/REGEXP/
+        (       LINE_BY_LINE_COMMAND\n)+
+        """
         s_re = re.search(r'table\((.*)\):', s) # syntax "if /xxx/:"
         if s_re is None:
             raise SyntaxError
@@ -52,7 +50,7 @@ class Command_Table(Top):
             if s[:8]=='endtable':
                 break
             from Grammar.LineCommandFactory import LineCommandFactory
-            cmd = LineCommandFactory(self.GI, self.FI, self.fn, self.parsed_container, s)
+            cmd = LineCommandFactory(self.GI, self.FI, self.parsed_container, self.troublemakers).assign()
             out.append(cmd)
         return out
 

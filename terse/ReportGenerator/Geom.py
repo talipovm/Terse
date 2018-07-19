@@ -1,5 +1,5 @@
 from Tools.ChemicalInfo import BohrR
-from ReportGenerator.Top import Top_ReportGenerator
+from ReportGenerator.Top_ReportGenerator import Top_ReportGenerator
 import Tools.misc as misc
 
 import logging

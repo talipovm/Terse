@@ -1,4 +1,4 @@
-from ReportGenerator.Top import Top_ReportGenerator
+from ReportGenerator.Top_ReportGenerator import Top_ReportGenerator
 
 class Scan(Top_ReportGenerator):
 

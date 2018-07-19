@@ -47,8 +47,12 @@ class Calculator(Top):
         except ValueError:
             pass
 
-        if s in self.params:  # variable substitution
-            return self.params[s]
+        var = self.get_params(s)
+        if var is not None:
+            try:
+                return int(var)
+            except:
+                pass
 
         for f_name, f in zip(self.function_names, self.functions):
             f_len = len(f_name)

@@ -7,7 +7,7 @@ from ReportGenerator.Freq import Freq
 from ReportGenerator.Opt import Opt
 from ReportGenerator.NoJobType import NoJobType
 from ReportGenerator.SinglePoint import SinglePoint
-from ReportGenerator.Top import Top_ReportGenerator
+from ReportGenerator.Top_ReportGenerator import Top_ReportGenerator
 
 class Job(Top_ReportGenerator):
 

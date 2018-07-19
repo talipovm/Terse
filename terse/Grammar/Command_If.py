@@ -14,7 +14,6 @@ class Command_If(Top_Grammar):
         self.end = None
         self.pattern = None
         self.commands = []
-
         self.preprocess(self.GI.s)
 
     def preprocess(self, s):
@@ -28,7 +27,7 @@ class Command_If(Top_Grammar):
     def get_enclosed_commands(self):
         out = []
         for s_grammar in self.GI:
-            s = s_grammar.lstrip()
+            s = s_grammar.lstrip().split('#')[0]
             if s[:5]=='endif':
                 break
             from Grammar.LineCommandFactory import LineCommandFactory # it has to be here to avoid import recursion

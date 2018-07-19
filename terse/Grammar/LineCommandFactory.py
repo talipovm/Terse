@@ -12,7 +12,7 @@ class LineCommandFactory(Top_Grammar):
     def __init__(self, GI, FI, parsed_container, troublemakers):
         super().__init__(GI, FI, parsed_container, troublemakers)
 
-        s = self.GI.s.lstrip()
+        s = self.GI.s.lstrip().split('#')[0]
         if s[:2]=='if':
             self.CmdClass = Command_If
         elif s[:4]=='jump':

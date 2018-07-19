@@ -23,7 +23,7 @@ class GlobalCommand_Troublemaker(Top_Grammar):
     def get_enclosed_commands(self):
         out = []
         for s_grammar in self.GI:
-            s = s_grammar.lstrip()
+            s = s_grammar.lstrip().split('#')[0]
             if s[:15]=='endtroublemaker':
                 break
             cmd = LineCommandFactory(self.GI, self.FI, self.parsed_container, self.troublemakers).assign()

@@ -42,8 +42,6 @@ class Grammar(Top_Grammar):
         self.patterns0 = defaultdict(dict)
         for s_full in self.GI:
             s = s_full.split('#')[0]
-            if s.strip()=='':
-                continue
             if re.search('^if',s):
                 p = GlobalCommand_If(self.GI, self.FI, self.parsed_container, self.troublemakers)
                 if p.pattern_type=='substring with position 0':

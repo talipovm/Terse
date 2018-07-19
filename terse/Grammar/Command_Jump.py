@@ -19,16 +19,19 @@ class Command_Jump(Top_Grammar):
 
     def execute(self):
         expr_type = self.f.type
-        if expr_type=='numeric_expression':
-            vals = self.f.get_value()
-            if vals:
-                n = int(vals[0])
-                self.FI.skip_n(n)
-            else:
-                log.debug('Numeric expression could not be evaluated')
-        elif expr_type == 'string':
-            vals = self.f.get_value()
-            self.FI.skip_until_string(pattern=vals[0])
-        elif expr_type=='regex':
-            self.FI.skip_until_regex(pattern=self.f.pattern)
+        try:
+            if expr_type=='numeric_expression':
+                vals = self.f.get_value()
+                if vals:
+                    n = int(vals[0])
+                    self.FI.skip_n(n)
+                else:
+                    log.debug('Numeric expression could not be evaluated')
+            elif expr_type == 'string':
+                vals = self.f.get_value()
+                self.FI.skip_until_string(pattern=vals[0])
+            elif expr_type=='regex':
+                self.FI.skip_until_regex(pattern=self.f.pattern)
+        except StopIteration:
+            pass
 

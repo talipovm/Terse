@@ -4,6 +4,9 @@ from Tools.misc import strip_all, get_range
 from Grammar.Top_Grammar import Top_Grammar
 from Top import Top
 
+import logging
+log = logging.getLogger(__name__)
+
 class ExpressionFactory(Top_Grammar):
 
     def __init__(self, s_GI, f_get_params=None):
@@ -88,9 +91,19 @@ class Expression_arithmetics(Top):
         self.expression = s_GI[i:j]
         self.f_get_params = f_get_params
         self.calc = Calculator(get_params=lambda x: self.f_get_params(x))
+        self.counter = None
 
     def match(self, s_FI):
-        raise NotImplementedError
+        if self.counter is None:
+            vals = self.get_value(s_FI)
+            if vals:
+                self.counter = int(vals[0])
+            else:
+                log.debug('Numeric expression could not be evaluated')
+        if self.counter == 0:
+            return True
+        self.counter = self.counter - 1
+        return False
 
     def get_value(self, s_FI=None):
         try:

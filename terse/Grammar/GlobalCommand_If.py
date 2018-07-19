@@ -42,7 +42,3 @@ class GlobalCommand_If(Top_Grammar):
     def execute(self):
         for cmd in self.commands:
             cmd.execute()
-
-
-class GlobalCommand_Troublemaker(Top_Grammar):
-    pass

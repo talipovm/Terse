@@ -71,6 +71,7 @@ class Command_Table(Top_Grammar):
                     else:
                         if re.search(self.condition, self.FI.s) is not None:
                             break
+
                 elif self.mode == 'run_while':
                     if re.search(self.condition, self.FI.s) is None:
                         break

@@ -101,6 +101,7 @@ class Expression_arithmetics(Top):
             else:
                 log.debug('Numeric expression could not be evaluated')
         if self.counter == 0:
+            self.counter = None
             return True
         self.counter = self.counter - 1
         return False

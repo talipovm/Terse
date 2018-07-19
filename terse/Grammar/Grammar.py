@@ -1,5 +1,6 @@
 import re
-from Grammar.GlobalCommand import GlobalCommand_If, GlobalCommand_Troublemaker
+from Grammar.GlobalCommand_If import GlobalCommand_If
+from Grammar.GlobalCommand_Troublemaker import GlobalCommand_Troublemaker
 from Containers.ParsedStructure import ParsedContainer
 from collections import defaultdict
 from Grammar.Top_Grammar import Top_Grammar
@@ -50,7 +51,7 @@ class Grammar(Top_Grammar):
                 else:
                     self.patterns[p.pattern_type].append(p)
             elif re.search('^troublemaker',s):
-                p = GlobalCommand_Troublemaker(self.GI, self.FI)
+                p = GlobalCommand_Troublemaker(self.GI, self.FI, self.parsed_container)
                 self.troublemakers.append(p)
 
     def find_datrie(self, s):

@@ -15,7 +15,7 @@ import time
 
 start = time.time()
 
-do_parallel = True
+do_parallel = False
 do_profiling = False
 
 if do_profiling:

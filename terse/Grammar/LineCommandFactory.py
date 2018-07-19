@@ -1,5 +1,6 @@
 from Grammar.Command_If import Command_If
 from Grammar.Command_Jump import Command_Jump
+from Grammar.Command_SafeJump import Command_SafeJump
 from Grammar.Command_Table import Command_Table
 from Grammar.Command_Assign import Command_Assign
 from Grammar.Top_Grammar import Top_Grammar
@@ -16,6 +17,8 @@ class LineCommandFactory(Top_Grammar):
             self.CmdClass = Command_If
         elif s[:4]=='jump':
             self.CmdClass = Command_Jump
+        elif s[:8]=='safejump':
+            self.CmdClass = Command_SafeJump
         elif s[:5]=='table':
             self.CmdClass = Command_Table
         elif '=' in s:

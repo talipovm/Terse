@@ -18,8 +18,6 @@ class Processing(Top):
         Example:
         separator(new_step) -> opt
         Object is changed internally
-        :param s:
-        :return:
         """
         if before:
             s_re = re.search(r'aggregate_before\((.*)\)\s*->\s*(.*)', s)
@@ -31,10 +29,6 @@ class Processing(Top):
         self.parsed.group_container_by_key(separator_key, new_key, before)
 
     def command_last(self, s):
-        """
-        :param s:
-        :return:
-        """
         s_re = re.search(r'last_value\((.*)\)\s*->\s*(.*)', s)
         if s_re is None:
             raise SyntaxError
@@ -42,10 +36,6 @@ class Processing(Top):
         self.parsed.add_latest_rec(old_key=old_key, new_key=new_key)
 
     def command_nonempty(self, s):
-        """
-        :param s:
-        :return:
-        """
         s_re = re.search(r'nonempty\((.*)\)\s*->\s*(\S.*\S)\s*', s)
         if s_re is None:
             raise SyntaxError
@@ -53,10 +43,6 @@ class Processing(Top):
         self.parsed.edit_nonempty_rec(old_key=old_key, new_key=new_key)
 
     def command_joinunique(self, s):
-        """
-        :param s:
-        :return:
-        """
         s_re = re.search(r'join_unique\((.*)\)\s*->\s*(\S.*\S)\s*', s)
         if s_re is None:
             raise SyntaxError
@@ -64,10 +50,6 @@ class Processing(Top):
         self.parsed.join_unique(old_key=old_key, new_key=new_key)
 
     def command_assign(self, s):
-        """
-        :param s:
-        :return:
-        """
         s_re = re.search(r'\s*(\S.*\S)\s*->\s*(\S.*\S)\s*', s)
         if s_re is None:
             raise SyntaxError
@@ -83,11 +65,15 @@ class Processing(Top):
             new_value = unquote_if_quoted(new_value)
         self.parsed.conditionally_add(old_key=old_key, new_key=new_key, old_value=old_value, new_value=new_value)
 
+    def command_separate_columns(self, s):
+        s_re = re.search(r'separate_columns\s*\((\S+)\)\s*->\s*(.*)', s)
+        if s_re is None:
+            raise SyntaxError
+        old_key = s_re.group(1)
+        new_keys = strip_all(s_re.group(2).split(','))
+        self.parsed.separate_columns(old_key=old_key,new_keys=new_keys)
+
     def process_command(self, s):
-        """
-        :param s:
-        :return:
-        """
         if not s:
             return
 
@@ -113,6 +99,10 @@ class Processing(Top):
 
         if s.find('geom_use')==0:
             self.command_joinunique(s)
+            return
+
+        if s.find('separate_columns')==0:
+            self.command_separate_columns(s)
             return
 
         if '->' in s: # has to be the last_value one

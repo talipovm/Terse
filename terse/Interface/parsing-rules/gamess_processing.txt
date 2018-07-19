@@ -86,6 +86,8 @@ wftype -> P_wftype
 gbasis -> P_basis
 wftype_fragment -> P_wftype_fragment # e.g. FMO
 
+separate_columns(charges_mull_low) -> P_charges_Mulliken,P_charges_Lowdin
+
 last_value(new_step) -> P_opt_iter
 # join_unique(new_step) -> steps
 

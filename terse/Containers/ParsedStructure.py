@@ -16,6 +16,10 @@ class ParsedElement(Top):
     def __str__(self,prefix=''):
         return "%s%s: %s" % (prefix, self.key, self.data)
 
+    def get_columns(self, new_keys):
+        columns = zip(*self.data)
+        return [ParsedElement(k,v) for k,v in zip(new_keys,columns)]
+
 
 class ParsedContainer(Top):
     def __init__(self, key = 'Main', data=None):
@@ -66,18 +70,6 @@ class ParsedContainer(Top):
             return out.data.strip()
         return out.data
 
-    def int_values(self):
-        """
-        :return: a dictionary of keys with integer values
-        """
-        d = {}
-        for assigned_element in self.data:
-            try:
-                d[assigned_element.key] = int(assigned_element.data) # will overwrite old data
-            except (ValueError,TypeError):
-                continue
-        return d
-
     def flatten(self):
         """
         :return: List
@@ -98,15 +90,6 @@ class ParsedContainer(Top):
             return s
         else:
             return "%s%s\n" % (prefix,v)
-
-    """
-    def get_last(self, key):
-        latest_item = None
-        for item in self.flatten():
-            if key == item.key:
-                latest_item = item
-        return latest_item
-    """
 
     def add_latest_rec(self, old_key, new_key):
         if not self.data:
@@ -199,6 +182,23 @@ class ParsedContainer(Top):
             [item.group_container_by_key(key, new_key, before=before) for item in self.data]
         else:
             self.group_plain_container_by_key(key=key, new_key=new_key, before=before)
+
+    def plain_separate_columns(self, old_key, new_keys):
+        for (i,item) in enumerate(self.data):
+            if item.key==old_key:
+                z = self.data.pop(i)
+                for pe in z.get_columns(new_keys):
+                    self.data.insert(i,pe)
+        pass
+
+    def separate_columns(self, old_key, new_keys):
+        if not self.data:
+            return
+        if isinstance(self.data[0], ParsedContainer):  # Container data are assumed to be of the same type
+            [item.separate_columns(old_key, new_keys) for item in self.data]
+        else:
+            self.plain_separate_columns(old_key, new_keys)
+        pass
 
 if __name__ == "__main__":
     from Settings import Settings

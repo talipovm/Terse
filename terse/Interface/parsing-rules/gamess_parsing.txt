@@ -52,6 +52,9 @@ endif
 # FMO
 if [0]' Total energy of the molecule: Euncorr(2)':
     dftb_energy = /Total energy of the molecule: Euncorr\(2\)=\s*(\S+)/
+    if /Euncorr\(2\)=\s*-/:
+        scf_done = 'True'
+    endif
 endif
 
 # FMO

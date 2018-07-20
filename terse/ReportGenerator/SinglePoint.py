@@ -8,14 +8,14 @@ log = logging.getLogger(__name__)
 
 class SinglePoint(Top_ReportGenerator):
     def __init__(self,we,parsed):
-        super().__init__(we,parsed)
         self.scf_progress = list()
+        super().__init__(we,parsed)
 
     def prepare_for_report(self):
         sp = self.parsed
+
         self.scf_ok = (sp.last_value('P_scf_done' )== 'True')
         self.do_scf_progress = not self.scf_ok
-
         if self.do_scf_progress:
             v = sp.last_value('P_scf_progress')
             if v is not None and len(v )>0:
@@ -23,6 +23,9 @@ class SinglePoint(Top_ReportGenerator):
                     self.scf_progress = list(zip(*v))
                 else:
                     self.scf_progress = v
+        self.q_Mulliken = sp.last_value('P_charges_Mulliken')
+        self.q_Lowdin = sp.last_value('P_charges_Lowdin')
+        self.charges_available = self.q_Mulliken or self.q_Lowdin
 
     def scf_conv_plot_html(self):
         # save the convergence plot
@@ -36,6 +39,23 @@ class SinglePoint(Top_ReportGenerator):
         else:
             return 'Not enough data to produce convergence plot'
 
+    def charges(self, charges,name):
+        col_min, col_max = -1.0, 1.0
+        script_on = "; ".join([
+            "x='%(a)s'",
+            "DATA '%(p)s @x'",
+            "label %%.%(precision)s[%(p)s]",
+            "color atoms %(p)s 'rwb' absolute %(col_min)f %(col_max)f"
+        ]) % {
+            'a': " ".join(charges),
+            'p': 'property_' + name,
+            'precision': str(3),
+            'col_min': col_min,
+            'col_max': col_max
+        }
+        return script_on
+
+
     def save_geom(self):
         G = str(Geom(self.we,self.parsed))
         if not G:
@@ -45,7 +65,7 @@ class SinglePoint(Top_ReportGenerator):
     def load_in_jmol(self, webpath):
         cmd = [
             self.we.jmol_load_file(webpath),
-            self.we.jmol_text('Single point calculation, last_value geometry')
+            self.we.jmol_text('Single point calculation, last geometry')
         ]
         return "; ".join(cmd)
 
@@ -72,6 +92,17 @@ class SinglePoint(Top_ReportGenerator):
 
         if self.do_scf_progress:
             self.add_right(self.scf_conv_plot_html())
+            self.add_right(self.br_tag)
+
+        if self.charges_available:
+            if self.q_Mulliken:
+                s  = self.we.html_button(self.charges(self.q_Mulliken,'Mulliken'), 'Mulliken')
+                self.add_right(s)
+            if self.q_Lowdin:
+                s  = self.we.html_button(self.charges(self.q_Lowdin,'Lowdin'), 'Lowdin')
+                self.add_right(s)
+            button_off = self.we.html_button('label off;color atoms cpk', 'Off')
+            self.add_right(button_off)
             self.add_right(self.br_tag)
 
         return self.get_cells()

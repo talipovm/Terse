@@ -9,23 +9,67 @@ class Charges(Top_ReportGenerator):
         super().__init__(we,parsed)
 
     def prepare_for_report(self):
-        self.q_Mulliken = self.parsed.last_value('P_charges_Mulliken')
-        self.q_Lowdin = self.parsed.last_value('P_charges_Lowdin')
-        self.available = self.q_Mulliken or self.q_Lowdin
+        geom = self.parsed.last_value('P_geom')
+        q_Mulliken = self.parsed.last_value('P_charges_Mulliken')
+        q_Lowdin = self.parsed.last_value('P_charges_Lowdin')
+        Q = (
+            (q_Mulliken, 'Mulliken'),
+            (self.combineH(q_Mulliken, geom), 'no_H'),
+            (q_Lowdin, 'Lowdin'),
+            (self.combineH(q_Lowdin, geom), 'no_H'),
+        )
+        self.Q = ((q,name) for q,name in Q if q is not None)
+        self.available = (self.Q is not None)
+
+    def combineH(self, q, geom):
+        if (geom is None) or (q is None) or ([atom for atom in geom if atom[0]!='H'] is None):
+            return None
+        out = [float(x) for x in q]
+        at_pairs = self.assignH(geom)
+        for i,j in at_pairs:
+            out[j] += out[i]
+            out[i] = 0
+        return [str(x) for x in out]
+
+    def assignH(self, geom):
+        return [(i,self.find_closest(i,geom)) for i,atom in enumerate(geom) if atom[0]=='H']
+
+    def find_closest(self,i,geom):
+        x,y,z = [float(q) for q in geom[i][1:]]
+        min_r2 = 1e6
+        min_j = 0
+        for j,at2 in enumerate(geom):
+            if at2[0]=='H' or i==j:
+                continue
+            x2,y2,z2 = [float(q) for q in at2[1:]]
+            r = (x2-x)**2 + (y2-y)**2 + (z2-z)**2
+            if r < min_r2:
+                min_r2 = r
+                min_j = j
+        return min_j
 
     def charges_button(self, load_command, charges, name):
-        col_min, col_max = -1.0, 1.0
+        color_min, color_max = -1.0, 1.0
+        h_1 = h_2 = ""
+        if 'no_H' in name:
+            h_1 = "color atoms cpk; label off ; select not Hydrogen"
+            h_2 = "select all"
+
         script_on = "; ".join([
             "x='%(a)s'",
             "DATA '%(p)s @x'",
+            "%(h_1)s",
             "label %%.%(precision)s[%(p)s]",
-            "color atoms %(p)s 'rwb' absolute %(col_min)f %(col_max)f"
+            "color atoms %(p)s 'rwb' absolute %(col_min)f %(col_max)f",
+            "%(h_2)s"
         ]) % {
             'a': " ".join(charges),
             'p': 'property_' + name,
             'precision': str(2),
-            'col_min': col_min,
-            'col_max': col_max
+            'col_min': color_min,
+            'col_max': color_max,
+            'h_1': h_1,
+            'h_2': h_2
         }
         script_on ="; ".join([load_command,script_on])
         return self.we.html_button(script_on, name)
@@ -36,12 +80,11 @@ class Charges(Top_ReportGenerator):
     def button_bar(self, load_command):
         if not self.available:
             return ''
-        if self.q_Mulliken:
-            s = self.charges_button(load_command, self.q_Mulliken, 'Mulliken')
-            self.add_right(s)
 
-        if self.q_Lowdin:
-            s = self.charges_button(load_command, self.q_Lowdin, 'Lowdin')
+        self.add_right('Charges: ')
+
+        for q,name in self.Q:
+            s = self.charges_button(load_command, q, name)
             self.add_right(s)
 
         self.add_right(self.charges_button_off())

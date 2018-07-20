@@ -2,6 +2,7 @@ from ReportGenerator.Geom import Geom
 from ReportComponents.Plot import Plot
 from ReportGenerator.Top_ReportGenerator import Top_ReportGenerator
 from ReportComponents.WebFile import WebFile
+from ReportGenerator.Charges import Charges
 
 import logging
 log = logging.getLogger(__name__)
@@ -23,9 +24,10 @@ class SinglePoint(Top_ReportGenerator):
                     self.scf_progress = list(zip(*v))
                 else:
                     self.scf_progress = v
-        self.q_Mulliken = sp.last_value('P_charges_Mulliken')
-        self.q_Lowdin = sp.last_value('P_charges_Lowdin')
-        self.charges_available = self.q_Mulliken or self.q_Lowdin
+        if self.scf_ok:
+            self.charges = Charges(self.we,self.parsed)
+        else:
+            self.charges = None
 
     def scf_conv_plot_html(self):
         # save the convergence plot
@@ -38,23 +40,6 @@ class SinglePoint(Top_ReportGenerator):
             return self.img_tag(plt.web_path)
         else:
             return 'Not enough data to produce convergence plot'
-
-    def charges(self, charges,name):
-        col_min, col_max = -1.0, 1.0
-        script_on = "; ".join([
-            "x='%(a)s'",
-            "DATA '%(p)s @x'",
-            "label %%.%(precision)s[%(p)s]",
-            "color atoms %(p)s 'rwb' absolute %(col_min)f %(col_max)f"
-        ]) % {
-            'a': " ".join(charges),
-            'p': 'property_' + name,
-            'precision': str(3),
-            'col_min': col_min,
-            'col_max': col_max
-        }
-        return script_on
-
 
     def save_geom(self):
         G = str(Geom(self.we,self.parsed))
@@ -94,15 +79,7 @@ class SinglePoint(Top_ReportGenerator):
             self.add_right(self.scf_conv_plot_html())
             self.add_right(self.br_tag)
 
-        if self.charges_available:
-            if self.q_Mulliken:
-                s  = self.we.html_button(self.charges(self.q_Mulliken,'Mulliken'), 'Mulliken')
-                self.add_right(s)
-            if self.q_Lowdin:
-                s  = self.we.html_button(self.charges(self.q_Lowdin,'Lowdin'), 'Lowdin')
-                self.add_right(s)
-            button_off = self.we.html_button('label off;color atoms cpk', 'Off')
-            self.add_right(button_off)
-            self.add_right(self.br_tag)
+        if webpath and self.charges is not None:
+            self.add_both(self.charges.button_bar(load_command))
 
         return self.get_cells()

@@ -1,6 +1,7 @@
 from ReportGenerator.Geom import Geom
 from ReportGenerator.Top_ReportGenerator import Top_ReportGenerator
 from ReportComponents.WebFile import WebFile
+from ReportGenerator.Charges import Charges
 
 import logging
 log = logging.getLogger(__name__)
@@ -21,6 +22,7 @@ class Freq(Top_ReportGenerator):
             self.im_freq = (self.freqs_cm[self.start_from_freq]<0)
 
         self.prepare_thermochem()
+        self.charges = Charges(self.we,self.parsed)
 
     def prepare_thermochem(self):
         freq = self.parsed
@@ -103,6 +105,8 @@ class Freq(Top_ReportGenerator):
 
         if self.thermochem_available:
             self.add_right(self.thermochem_html())
-            self.add_right(self.br_tag)
+
+        if webpath and self.charges is not None:
+            self.add_both(self.charges.button_bar(load_command))
 
         return self.get_cells()

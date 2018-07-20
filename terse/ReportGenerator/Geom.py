@@ -33,10 +33,9 @@ class Geom(Top_ReportGenerator):
         if self.show_vibration is not None:
             self.prepare_vibrations()
 
-        def prepare_comments(self):
-            # extract e_scf,s2,... and convert into comment line
-            pass
-
+    def prepare_comments(self):
+        # TODO extract e_scf,s2,... and convert into comment line
+        pass
 
     def prepare_vibrations(self):
         # Reformat frequencies

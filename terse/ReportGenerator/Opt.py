@@ -2,6 +2,7 @@ from ReportGenerator.Geom import Geom
 from ReportComponents.Plot import Plot
 from ReportGenerator.Top_ReportGenerator import Top_ReportGenerator
 from ReportComponents.WebFile import WebFile
+from ReportGenerator.Charges import Charges
 
 import logging
 log = logging.getLogger(__name__)
@@ -18,6 +19,11 @@ class Opt(Top_ReportGenerator):
 
         if self.do_opt_progress:
             self.prepare_opt_convergence()
+
+        if self.opt_ok:
+            self.charges = Charges(self.we, self.parsed)
+        else:
+            self.charges = None
 
         if self.do_opt_progress:
             self.parsed_g = self.parsed.data[1:]  # TODO 1 might be program-dependent
@@ -99,5 +105,8 @@ class Opt(Top_ReportGenerator):
         if self.do_opt_progress:
             self.add_right(self.opt_conv_plot_html())
             self.add_right(self.br_tag)
+
+        if webpath and self.charges is not None:
+            self.add_both(self.charges.button_bar(load_command))
 
         return self.get_cells()

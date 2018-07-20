@@ -17,6 +17,8 @@ class Freq(Top_ReportGenerator):
 
         self.start_from_freq = 6  # TODO should not be hard-coded; some programs ignore TRANSL/ROT freqs automatically
 
+        self.freqs_cm = None
+        self.im_freq = None
         if P.last_value('P_freqs') is not None:
             self.freqs_cm = [float(fr[0]) for fr in P.last_value('P_freqs')]
             self.im_freq = (self.freqs_cm[self.start_from_freq]<0)

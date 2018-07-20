@@ -60,7 +60,7 @@ class Charges(Top_ReportGenerator):
             "DATA '%(p)s @x'",
             "%(h_1)s",
             "label %%.%(precision)s[%(p)s]",
-            "color atoms %(p)s 'rwb' absolute %(col_min)f %(col_max)f",
+            #"color atoms %(p)s 'rwb' absolute %(col_min)f %(col_max)f",
             "%(h_2)s"
         ]) % {
             'a': " ".join(charges),

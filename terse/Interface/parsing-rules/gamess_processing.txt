@@ -27,7 +27,7 @@ lcdftb=True -> wftype='LC-DFTB2 (or 3)'
 gbasis=DFTB -> SCF_energy=empty
 dftb_energy -> final_SCF_energy
 nonempty(SCF_energy) -> final_SCF_energy
-last_value(final_SCF_energy) -> P_scf_e
+final_SCF_energy -> P_scf_e
 
 gbasis=DFTB -> gbasis='minimal basis set'
 runtyp=ENERGY -> JobType=sp

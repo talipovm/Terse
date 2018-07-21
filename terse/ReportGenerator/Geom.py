@@ -36,8 +36,9 @@ class Geom(Top_ReportGenerator):
 
     def prepare_comments(self):
         # TODO extract s2, scan/IRC and convert into comment line
-        scf_e = "SCF_Energy= %-11.6f " % float(self.parsed.last_value('P_scf_e'))
-        self.comment = scf_e
+        P_scf_e = self.parsed.last_value('P_scf_e')
+        if P_scf_e is not None:
+            self.comment = "SCF_Energy= %-11.6f " % float(P_scf_e)
 
     def prepare_vibrations(self):
         # Reformat frequencies

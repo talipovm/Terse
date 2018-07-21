@@ -168,7 +168,7 @@ class JSMol(Top):
         ButtonFirst = self.html_button('frame 1', '<<')
         ButtonPrev = self.html_button('anim direction +1 ; frame prev', '<')
         ButtonNext = self.html_button('anim direction +1 ; frame next', '>')
-        ButtonLast = self.html_button('frame last_value', '>>')
+        ButtonLast = self.html_button('frame last', '>>')
         ButtonPlayOnce = self.html_button('anim mode once; frame 1; anim direction +1 ; anim on', 'Play once')
         ButtonPlayBack = self.html_button('anim mode once; frame 1; anim direction -1 ; anim on', 'Play back')
         ButtonStop = self.html_button('anim off', 'Stop')

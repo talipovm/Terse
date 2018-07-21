@@ -95,6 +95,9 @@ class Opt(Top_ReportGenerator):
         else:
             self.add_left(self.color_tag('No coordinates found!','err'))
 
+        self.add_right(self.strong_tag("OPT"))
+        self.add_right(self.br_tag)
+
         self.add_right(self.opt_steps())
         self.add_right(self.br_tag)
 

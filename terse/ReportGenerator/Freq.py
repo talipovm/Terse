@@ -98,6 +98,9 @@ class Freq(Top_ReportGenerator):
         else:
             self.add_left(self.color_tag('No coordinates found!','err'))
 
+        self.add_right(self.strong_tag("FREQ"))
+        self.add_right(self.br_tag)
+
         if self.freqs_cm:
             self.add_right(self.freq_range())
             self.add_right(self.br_tag)

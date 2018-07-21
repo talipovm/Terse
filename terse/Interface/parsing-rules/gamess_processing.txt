@@ -44,6 +44,7 @@ runtyp=freq -> JobType=freq
 last_value(solvent) -> P_solvent
 last_value(solv_model) -> P_solv_model
 last_value(sym) -> P_sym
+last_value(sym_axis) -> P_sym_axis
 last_value(charge) -> P_charge
 last_value(mult) -> P_mult
 scftype=UHF -> P_open_shell=True

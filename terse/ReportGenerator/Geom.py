@@ -1,4 +1,4 @@
-from Tools.ChemicalInfo import BohrR
+from Tools.ChemicalInfo import BohrR, to_element_name
 from ReportGenerator.Top_ReportGenerator import Top_ReportGenerator
 import Tools.misc as misc
 
@@ -24,12 +24,11 @@ class Geom(Top_ReportGenerator):
     def prepare_for_report(self):
         if self.geom is None:
             return None
-        if self.bohr_units:
-            for atom in self.geom:
-                s = '%s %.12f %.12f %.12f' % (atom[0],float(atom[1])*BohrR, float(atom[2])*BohrR, float(atom[3])*BohrR)
-                self.coord.append(s)
-        else:
-            self.coord = [' '.join(atom) for atom in self.geom]
+        for atom in self.geom:
+            atom[0] = to_element_name(atom[0])
+            if self.bohr_units:
+                atom[1:] = [str(float(q)*BohrR) for q in atom[1:]]
+        self.coord = [' '.join(atom) for atom in self.geom]
 
         if self.show_vibration is not None:
             self.prepare_vibrations()

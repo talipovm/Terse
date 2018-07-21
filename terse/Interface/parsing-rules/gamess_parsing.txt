@@ -111,6 +111,8 @@ endif
 
 if [0]' THE POINT GROUP OF THE MOLECULE IS':
     sym = /^ THE POINT GROUP OF THE MOLECULE IS\s+(\S+)/
+    safejump(1)
+    sym_axis = /^ THE ORDER OF THE PRINCIPAL AXIS IS\s+(\S+)/
 endif
 
 if [0]' BEGINNING GEOMETRY SEARCH POINT NSERCH=':
@@ -223,7 +225,7 @@ if [0]' COORDINATES OF ALL ATOMS ARE (ANGS)':
     is_geom_ang = 'True'
     safejump(3)
     table(geom,run_while=/\s+-?\d*\.\d*\s+-?\d*\.\d*\s+-?\d*\.\d*/):
-        row = field(1,3-5)
+        row = field(2-5)
         safejump(1)
     endtable
 endif
@@ -232,7 +234,7 @@ if [0]' ATOM      ATOMIC                      COORDINATES (BOHR)':
     is_geom_bohr = 'True'
     safejump(2)
     table(geom_bohr,run_until=//):
-        row = field(1,3-5)
+        row = field(2-5)
         safejump(1)
     endtable
 endif

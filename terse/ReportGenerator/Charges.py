@@ -1,4 +1,5 @@
 from ReportGenerator.Top_ReportGenerator import Top_ReportGenerator
+from ReportGenerator.Geom import Geom
 
 import logging
 log = logging.getLogger(__name__)
@@ -9,7 +10,7 @@ class Charges(Top_ReportGenerator):
         super().__init__(we,parsed)
 
     def prepare_for_report(self):
-        geom = self.parsed.last_value('P_geom')
+        geom = Geom(self.we,self.parsed).geom
         q_Mulliken = self.parsed.last_value('P_charges_Mulliken')
         q_Lowdin = self.parsed.last_value('P_charges_Lowdin')
         Q = (

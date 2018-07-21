@@ -45,7 +45,12 @@ class Job(Top_ReportGenerator):
             return self.color_tag(lot2, 'lot')
 
     def symmetry_html(self):
-        return "Symmetry: %s\n" % self.parsed.last_value('P_sym')
+        sym = self.parsed.last_value('P_sym')
+        sym_axis = self.parsed.last_value('P_sym_axis')
+        if sym_axis is not None:
+            return "Symmetry: %s, N=%s\n" % (sym,sym_axis)
+        else:
+            return "Symmetry: %s\n" % sym
 
     def charge_mult_html(self):
         charge = "Charge: %s; " % self.parsed.last_value('P_charge')

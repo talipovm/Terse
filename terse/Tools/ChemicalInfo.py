@@ -41,3 +41,27 @@ def to_elN(el):
             log.warning('Unrecognized element %s; assuming dummy atom' % (el.title()))
             el = 0
     return el
+
+def to_element_name(x):
+    if isinstance(x, str):
+        if x in at_name:
+            return x
+        try:
+            x = int(x)
+        except (ValueError,TypeError):
+            try:
+                x = float(x)
+            except (ValueError,TypeError):
+                log.error('Cannot get an element name')
+                raise SyntaxError
+
+    if isinstance(x,float):
+        xf = int(x)
+        if xf!=x:
+            log.error('Cannot get an element name')
+            raise SyntaxError
+        else:
+            x = xf
+
+    if isinstance(x,int):
+        return at_name[x]

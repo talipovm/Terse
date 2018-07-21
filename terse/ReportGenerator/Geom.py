@@ -19,6 +19,7 @@ class Geom(Top_ReportGenerator):
         self.vibs = list()
         self.vectors = list()
         self.prepare_for_report()
+        self.prepare_comments()
 
     def prepare_for_report(self):
         if self.geom is None:
@@ -34,8 +35,9 @@ class Geom(Top_ReportGenerator):
             self.prepare_vibrations()
 
     def prepare_comments(self):
-        # TODO extract e_scf,s2,... and convert into comment line
-        pass
+        # TODO extract s2, scan/IRC and convert into comment line
+        scf_e = "SCF_Energy= %-11.6f " % float(self.parsed.last_value('P_scf_e'))
+        self.comment = scf_e
 
     def prepare_vibrations(self):
         # Reformat frequencies

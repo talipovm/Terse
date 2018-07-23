@@ -79,7 +79,7 @@ class Job(Top_ReportGenerator):
         if P.last_value('P_solvent') is not None:
             sx = 'Solvation: '
             if P.last_value('P_solv_model') is not None:
-                sx += '%s(%s)' % (P.last_value('P_solv_model'), P.last_value('P_solvent'))
+                sx += '%s (%s)' % (P.last_value('P_solv_model'), P.last_value('P_solvent'))
             return self.color_tag(sx, 'lot')
 
     def coupled_cluster_html(self):

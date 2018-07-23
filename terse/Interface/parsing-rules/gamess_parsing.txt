@@ -52,6 +52,10 @@ if [0]'          ENERGY CONVERGED':
     scf_done = 'True'
 endif
 
+if [0]'          LAGRANGIAN CONVERGED':
+    scf_done = 'True'
+endif
+
 # FMO
 if [0]'                  The Fragment Molecular Orbital (FMO) method':
     fmo = 'True'
@@ -116,6 +120,10 @@ endif
 # basis set
 if [0]'     GBASIS=':
     gbasis,igauss,polar = /^     GBASIS=\s*(\S+)\s+IGAUSS=\s*(\S+)\s+POLAR=\s*(\S+)/
+endif
+
+if [0]'     $BASIS REQUESTS READING THE':
+    gbasis = /BASIS REQUESTS READING THE "(.*)"/
 endif
 
 if [0]'     NDFUNC=':
@@ -208,12 +216,13 @@ if [0]'     SOLVNT=':
     solvent = /SOLVNT=\s*(\S+)/
 endif
 
-if [0]'    **** A SOLVENT MODEL IS IN USE IN THIS RUN ****':
-    solvent = 'On'
+if [0]'     $SCRF OPTIONS':
+    solvent = '?'
+    solv_model = 'N/A'
 endif
 
 if [0]'     INPUT FOR':
-    solv_model = /INPUT FOR\s*(.*)\s+METHOD/
+    solv_model = /INPUT FOR\s*(.*)\s+SOLVATION CALCULATION/
 endif
 
 if [0]' NDFTB  =':
@@ -345,6 +354,8 @@ if [0]'   TIME     MODE     Q              P     KINETIC      POTENTIAL         
     endtable
 endif
 
-
+if [0]'     SUMMARY OF THE EFFECTIVE FRAGMENT POTENTIAL MODEL CHOSEN':
+    efp = 'True'
+endif
 
 # vim: filetype=awk

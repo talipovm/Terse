@@ -27,6 +27,7 @@ ndftb=3 -> wftype=DFTB3
 
 fmo_level=2 -> wftype_fragment='FMO2'
 fmo_level=3 -> wftype_fragment='FMO3'
+efp=True -> wftype_fragment='EFP'
 
 lcdftb=True -> wftype='LC-DFTB2 (or 3)'
 
@@ -53,8 +54,8 @@ runtyp=DRC -> JobType=drc
 
 last_value(solvent) -> P_solvent
 last_value(solv_model) -> P_solv_model
-last_value(sym) -> P_sym
 
+last_value(sym) -> P_sym
 sym_axis=0 -> sym_axis=empty
 nonempty(sym_axis) -> P_sym_axis
 

@@ -314,4 +314,37 @@ troublemaker /^ DDI:.*used by master data server/:
     jump(1)
 endtroublemaker
 
+
+#   TIME     MODE     Q              P     KINETIC      POTENTIAL          TOTAL
+#    FS       BOHR*SQRT(AMU) BOHR*SQRT(AMU)/FS   E         ENERGY         ENERGY
+#    0.1000  L 1      1.013279  0.052823   0.00159       -9.12870       -9.12710
+#            L 2      0.000000  0.000000
+#            L 3     -0.000004 -0.000000
+#            L 4      0.000000  0.000000
+#            L 5      0.000005  0.000001
+#            L 6     -0.140372 -0.014067
+# ---------------------------------------------------------------------------
+#           CARTESIAN COORDINATES (BOHR)               VELOCITY (BOHR/FS)
+# ---------------------------------------------------------------------------
+#  7.0    -0.00000    0.00000   -0.00062      -0.00000    0.00000   -0.00616
+#  1.0    -0.92275    1.59824    0.00285       0.00000   -0.00000    0.02851
+#  1.0    -0.92275   -1.59824    0.00285       0.00000    0.00000    0.02851
+#  1.0     1.84549    0.00000    0.00285      -0.00000    0.00000    0.02851
+# ---------------------------------------------------------------------------
+if [0]'   TIME     MODE     Q              P     KINETIC      POTENTIAL          TOTAL':
+    safejump(2)
+    drc_time,drc_poten = characters([1-10],[50-64])
+    safejump /CARTESIAN COORDINATES/
+    safejump(2)
+    if /BOHR/:
+        is_geom_bohr = 'True'
+    endif
+    table(geom_bohr,run_until=/-----/):
+        row = field(1-4)
+        safejump(1)
+    endtable
+endif
+
+
+
 # vim: filetype=awk

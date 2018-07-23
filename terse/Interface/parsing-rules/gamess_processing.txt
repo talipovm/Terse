@@ -49,6 +49,7 @@ tddft=T -> JobType='TD-DFT'
 runtyp=OPTIMIZE -> JobType=opt
 runtyp=freq -> JobType=freq
 runtyp=irc -> JobType=irc
+runtyp=DRC -> JobType=drc
 
 last_value(solvent) -> P_solvent
 last_value(solv_model) -> P_solv_model
@@ -101,6 +102,9 @@ thermo_h_corr -> P_thermo_h_corr
 thermo_g_corr -> P_thermo_g_corr
 thermo_units -> P_thermo_units
 
+drc_time -> P_drc_time
+drc_poten -> P_drc_poten
+
 term_ok -> P_term_ok
 join_unique(JobType) -> P_jobtype
 wftype -> P_wftype
@@ -109,9 +113,10 @@ wftype_fragment -> P_wftype_fragment # e.g. FMO
 
 last_value(new_step) -> P_opt_iter
 
-aggregate_before(scan) -> scan # use new_step as separator for the geometry optimization steps
-aggregate_before(new_irc) -> irc # use new_step as separator for the geometry optimization steps
+aggregate_before(scan) -> scan
+aggregate_before(new_irc) -> irc
 aggregate_before(new_step) -> opt # use new_step as separator for the geometry optimization steps
+aggregate_before(P_drc_time) -> drc
 
 
 # vim: filetype=R

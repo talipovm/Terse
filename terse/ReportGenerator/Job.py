@@ -3,6 +3,7 @@ log = logging.getLogger(__name__)
 
 from ReportGenerator.Scan import Scan
 from ReportGenerator.IRC import IRC
+from ReportGenerator.DRC import DRC
 from ReportGenerator.Freq import Freq
 from ReportGenerator.Opt import Opt
 from ReportGenerator.NoJobType import NoJobType
@@ -121,7 +122,7 @@ class Job(Top_ReportGenerator):
             return self.get_cells()
 
         job_type_found = False
-        job_types = {'scan':Scan,'irc':IRC,'opt':Opt}
+        job_types = {'scan':Scan,'irc':IRC,'opt':Opt,'drc':DRC}
         for name,Gen in job_types.items():
             if name not in jobtype:
                 continue

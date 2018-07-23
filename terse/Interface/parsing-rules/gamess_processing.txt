@@ -1,8 +1,11 @@
 # [PROCESSING RULES]
 
-mplevl=0 -> mplevl=empty
-last_value(mplevl) -> wf_mp
-nonempty(wf_mp) -> wftype
+# QM METHOD:
+
+mplevl=2 -> wftype=MP2
+mplevl=3 -> wftype=MP3
+mplevl=4 -> wftype=MP4
+mplevl=5 -> wftype=MP5
 
 cityp=NONE -> cityp=empty
 last_value(cityp) -> wf_cityp
@@ -12,6 +15,8 @@ cctyp=NONE -> cctyp=empty
 last_value(cctyp) -> wf_cctyp
 nonempty(wf_cctyp) -> wftype
 
+runtyp=HESSIAN -> runtyp=freq
+runtyp=IRC -> runtyp=irc
 hssend=T -> runtyp=freq
 dft=NONE -> dft=empty
 last_value(dft) -> wf_dft
@@ -24,48 +29,63 @@ fmo_level=2 -> wftype_fragment='FMO2'
 fmo_level=3 -> wftype_fragment='FMO3'
 
 lcdftb=True -> wftype='LC-DFTB2 (or 3)'
+
+
+# ENERGY
+gbasis=DFTB -> gbasis='minimal basis set'
 gbasis=DFTB -> SCF_energy=empty
 dftb_energy -> final_SCF_energy
 nonempty(SCF_energy) -> final_SCF_energy
 final_SCF_energy -> P_scf_e
 
-gbasis=DFTB -> gbasis='minimal basis set'
+irc_energy -> P_irc_energy
+irc_coord -> P_irc_coord
+
+
+# JOB TYPE
+join_unique(runtyp) -> P_unknown_jobtype
 runtyp=ENERGY -> JobType=sp
-
 tddft=T -> JobType='TD-DFT'
-
-# runtyp=XXX -> JobType=irc
-# runtyp=XXX -> JobType=scan
-# runtyp=XXX -> JobType=td
-# runtyp=freq -> JobType=freq
 runtyp=OPTIMIZE -> JobType=opt
 runtyp=freq -> JobType=freq
+runtyp=irc -> JobType=irc
 
 last_value(solvent) -> P_solvent
 last_value(solv_model) -> P_solv_model
 last_value(sym) -> P_sym
-last_value(sym_axis) -> P_sym_axis
+
+sym_axis=0 -> sym_axis=empty
+nonempty(sym_axis) -> P_sym_axis
+
 last_value(charge) -> P_charge
 last_value(mult) -> P_mult
-scftype=UHF -> P_open_shell=True
-    
+
+wftype=UHF -> P_open_shell=True
+
 ccsd_pTp_energy -> P_ccsd_pTp_energy
 T1_diagnostic -> P_T1_diagnostic
-# XXX -> frozen # geometrical parameters
-# XXX -> uv # (lambda, fosc pairs)
-# latest(new_step) -> opt_iter
-# 
-#charges -> atprops
 
 is_geom_ang='True' -> geom_bohr='empty' # if geometry is available in Angstroms, ignore that in bohrs
 nonempty(geom_bohr) -> geom            # if geometry in Bohrs was not ignored, use it
 
-last_value(scf_done) -> P_scf_done
-scf_notconv='True' -> P_scf_done='False'
+last_value(start_skip_freq) -> P_start_skip_freq
+last_value(end_skip_freq) -> P_end_skip_freq
+last_value(start_im_freq) -> P_start_im_freq
+last_value(end_im_freq) -> P_end_im_freq
 
+
+last_value(scf_started) -> P_scf_started
+last_value(scf_done) -> P_scf_done
+
+scf_notconv='True' -> P_scf_done='False'
 scf_progress -> P_scf_progress
 
 S2 -> P_S2
+separate_columns(charges_mull_low) -> P_charges_Mulliken,P_charges_Lowdin
+
+scftyp -> to_empty(wftype)
+
+# VARIABLES STARTING WITH P_ ARE USED BY THE HTML REPORT GENERATOR
 
 opt_ok -> P_opt_ok
 geom_bohr -> P_geom_bohr
@@ -87,13 +107,11 @@ wftype -> P_wftype
 gbasis -> P_basis
 wftype_fragment -> P_wftype_fragment # e.g. FMO
 
-separate_columns(charges_mull_low) -> P_charges_Mulliken,P_charges_Lowdin
-
 last_value(new_step) -> P_opt_iter
-# join_unique(new_step) -> steps
 
 aggregate_before(scan) -> scan # use new_step as separator for the geometry optimization steps
-aggregate_before(irc) -> irc # use new_step as separator for the geometry optimization steps
+aggregate_before(new_irc) -> irc # use new_step as separator for the geometry optimization steps
 aggregate_before(new_step) -> opt # use new_step as separator for the geometry optimization steps
+
 
 # vim: filetype=R

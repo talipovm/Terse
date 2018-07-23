@@ -7,6 +7,7 @@ log = logging.getLogger(__name__)
 class Charges(Top_ReportGenerator):
 
     def __init__(self,we,parsed):
+        self.Q = list()
         super().__init__(we,parsed)
 
     def prepare_for_report(self):
@@ -19,8 +20,8 @@ class Charges(Top_ReportGenerator):
             (q_Lowdin, 'Lowdin'),
             (self.combineH(q_Lowdin, geom), 'no_H'),
         )
-        self.Q = ((q,name) for q,name in Q if q is not None)
-        self.available = (self.Q is not None)
+        self.Q = list((q,name) for q,name in Q if q is not None)
+        self.available = (len(list(self.Q))>0)
 
     def combineH(self, q, geom):
         if (geom is None) or (q is None) or ([atom for atom in geom if atom[0]!='H'] is None):

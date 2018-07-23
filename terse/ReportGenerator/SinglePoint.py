@@ -15,7 +15,9 @@ class SinglePoint(Top_ReportGenerator):
     def prepare_for_report(self):
         sp = self.parsed
 
-        self.scf_ok = (sp.last_value('P_scf_done' )== 'True')
+        scf_started = (sp.last_value('P_scf_started' )== 'True')
+        scf_done = (sp.last_value('P_scf_done' )== 'True')
+        self.scf_ok = (scf_started == scf_done)
         self.do_scf_progress = not self.scf_ok
         if self.do_scf_progress:
             v = sp.last_value('P_scf_progress')
@@ -57,6 +59,23 @@ class SinglePoint(Top_ReportGenerator):
     def report_text(self):
         pass
 
+    def jobtype_html(self):
+        P = self.parsed
+        jobtype = P.last_value('P_jobtype')
+        if not jobtype:
+            jobtype = P.last_value('P_unknown_jobtype')
+            if jobtype is None:
+                return 'Job type not determined'
+        if isinstance(jobtype,list):
+            sx = " ".join(jobtype).upper()
+        else:
+            sx = jobtype.upper()
+        sx = self.strong_tag(sx)
+        if P.last_value('P_term_ok')== 'True':
+            return sx
+        else:
+            return self.color_tag(sx, 'err')
+
     def report_html(self):
         webpath = self.save_geom()
         if webpath:
@@ -70,6 +89,9 @@ class SinglePoint(Top_ReportGenerator):
             [self.add_left(s) for s in out_html]
         else:
             self.add_left(self.color_tag('No coordinates found!','err'))
+
+        self.add_right(self.jobtype_html())
+        self.add_right(self.br_tag)
 
         if not self.scf_ok:
             self.add_right(self.color_tag('Incomplete SCF!','err'))

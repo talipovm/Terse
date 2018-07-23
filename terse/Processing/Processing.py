@@ -49,6 +49,13 @@ class Processing(Top):
         old_key, new_key = s_re.groups()
         self.parsed.join_unique(old_key=old_key, new_key=new_key)
 
+    def command_to_empty(self, s):
+        s_re = re.search(r'(\S.*\S)\s*->\s*to_empty\s*\((\S.*\S)\)', s)
+        if s_re is None:
+            raise SyntaxError
+        old_key, new_key = s_re.groups()
+        self.parsed.to_empty(old_key=old_key, new_key=new_key)
+
     def command_assign(self, s):
         s_re = re.search(r'\s*(\S.*\S)\s*->\s*(\S.*\S)\s*', s)
         if s_re is None:
@@ -63,6 +70,8 @@ class Processing(Top):
         if '=' in new_key:
             new_key, new_value = strip_all(new_key.split('='))
             new_value = unquote_if_quoted(new_value)
+        if (old_key==new_key) and (old_value==new_value):
+            raise SyntaxError
         self.parsed.conditionally_add(old_key=old_key, new_key=new_key, old_value=old_value, new_value=new_value)
 
     def command_separate_columns(self, s):
@@ -103,6 +112,10 @@ class Processing(Top):
 
         if s.find('separate_columns')==0:
             self.command_separate_columns(s)
+            return
+
+        if 'to_empty' in s:
+            self.command_to_empty(s)
             return
 
         if '->' in s: # has to be the last_value one

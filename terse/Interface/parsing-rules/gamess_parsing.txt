@@ -14,11 +14,16 @@ if [0]' DFTTYP=':
     dft,tddft = /^ DFTTYP=\s*(\S+)\s*TDDFT =\s*(\S+)/
 endif
 
+if [0]' DETERMINANTAL MULTIREFERENCE 2ND ORDER PERTURBATION THEORY (MRPT2)':
+    scftyp = 'MRPT2'
+endif
+
 if [0]'          IHREP  =':
     hssend = /HSSEND =\s*(\S+)/
 endif
 
-if [0]' ITER EX DEM     TOTAL ENERGY        E CHANGE':
+if [0]' ITER EX':
+    scf_started = 'True'
     table(scf_progress,run_until=//):
         if /^\s*\d+/:
             row = characters([11-30])
@@ -31,7 +36,19 @@ if [0]' SCF IS UNCONVERGED, TOO MANY ITERATIONS':
     scf_notconv = 'True'
 endif
 
+if [0]' FMO SCF converger options':
+    scf_started = 'True'
+endif
+
 if [0]'          DENSITY CONVERGED':
+    scf_done = 'True'
+endif
+
+if [0]' ITER     TOTAL ENERGY      DEL':
+    scf_started = 'True'
+endif
+
+if [0]'          ENERGY CONVERGED':
     scf_done = 'True'
 endif
 
@@ -119,12 +136,23 @@ if [0]' BEGINNING GEOMETRY SEARCH POINT NSERCH=':
     new_step = /^ BEGINNING GEOMETRY SEARCH POINT NSERCH=\s*(\S+)/
 endif
 
+if [0]' *** TO FIND THE NEXT REACTION PATH POINT ****':
+    new_irc = 'True'
+endif
+
+if [0]'          AT PATH DISTANCE STOTAL =':
+    irc_coord = /          AT PATH DISTANCE STOTAL =\s*(\S+)/
+    safejump(1)
+    irc_energy = /          TOTAL ENERGY            =\s*(\S+)/
+endif
+
 if [0]' NUMBER OF CARTESIAN ATOMIC ORBITALS=':
     naos = /^ NUMBER OF CARTESIAN ATOMIC ORBITALS=\s*(\S+)/
 endif
 
 if [0]' NUMBER OF CARTESIAN GAUSSIAN BASIS FUNCTIONS =':
     naos = /^ NUMBER OF CARTESIAN GAUSSIAN BASIS FUNCTIONS =\s*(\S+)/
+    nmos = /^ NUMBER OF CARTESIAN GAUSSIAN BASIS FUNCTIONS =\s*(\S+)/
 endif
 
 if [0]' TOTAL NUMBER OF MOS IN VARIATION SPACE=':
@@ -180,12 +208,20 @@ if [0]'     SOLVNT=':
     solvent = /SOLVNT=\s*(\S+)/
 endif
 
+if [0]'    **** A SOLVENT MODEL IS IN USE IN THIS RUN ****':
+    solvent = 'On'
+endif
+
 if [0]'     INPUT FOR':
     solv_model = /INPUT FOR\s*(.*)\s+METHOD/
 endif
 
 if [0]' NDFTB  =':
     ndftb,scc,dftb3 = /NDFTB  =\s*(\S+)\s+SCC    =\s*(\S+)\s+DFTB3  =\s*(\S+)\s+/
+endif
+
+if [0]'          S-SQUARED =':
+    S2 = /^          S-SQUARED =\s*(\S+)/
 endif
 
 if [0]' - TURN ON A PRELIMINARY VERSION OF LONG-RANGE CORRECTED DFTB':
@@ -253,6 +289,11 @@ if [0]'  MODE FREQ(CM**-1)  SYMMETRY  RED. MASS  IR INTENS':
         row = field(2,5)
         safejump(1)
     endtable
+endif
+
+if [0]' MODE':
+    start_skip_freq,end_skip_freq = / MODES\s+(\S+)\s+TO\s+(\S+)\s+ARE TAKEN AS ROTATIONS AND TRANSLATIONS/
+    start_im_freq,end_im_freq = / MODE\(S\)\s+(\S+)\s+TO\s+(\S+)\s+TREATED AS IMAGINARY/
 endif
 
 if [0]'          TOTAL MULLIKEN AND LOWDIN ATOMIC POPULATIONS':

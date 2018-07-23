@@ -10,15 +10,12 @@ class ReportGenerator(Top_ReportGenerator):
         super().__init__(we=self.settings.Engine3D(),parsed=processed)
 
     def prepare_for_report(self):
-        self.do_multijob = (self.parsed.aggregate_name == 'job')
+        pass
 
     def report_text(self):
         pass
 
     def report_html(self):
-        if self.do_multijob:
-            jobs = self.parsed
-        else:
-            jobs = [self.parsed]
+        jobs = self.parsed.separate('job')
         z = [Job(self.we,p).report() for p in jobs]
         return ["".join(v) for v in zip(*z)]

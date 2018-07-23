@@ -21,7 +21,9 @@ class Job(Top_ReportGenerator):
         P = self.parsed
         jobtype = P.last_value('P_jobtype')
         if not jobtype:
-            return 'Job type not determined'
+            jobtype = P.last_value('P_unknown_jobtype')
+            if jobtype is None:
+                return 'Job type not determined'
         if isinstance(jobtype,list):
             sx = " ".join(jobtype).upper()
         else:
@@ -63,9 +65,9 @@ class Job(Top_ReportGenerator):
 
     def scf_energy_html(self):
         try:
-            return "Last SCF Energy= %-11.6f\n" % float(self.parsed.last_value('P_scf_e'))
+            return "Last Total Energy= %-11.6f\n" % float(self.parsed.last_value('P_scf_e'))
         except TypeError:
-            return "Last SCF Energy %s\n" % self.color_tag('N/A','err')
+            return "Total Energy %s\n" % self.color_tag('N/A','err')
 
     def scf_failed_html(self):
         if self.parsed.last_value('P_scf_notconv')== 'True':
@@ -97,15 +99,15 @@ class Job(Top_ReportGenerator):
     def report_html(self):
         self.add_left(self.we.initiate_jmol_applet()) # initialize an JSMol applet
         out_html = [
-            self.jobtype_html(),
+            #self.jobtype_html(),
             self.level_of_theory_html(),
+            self.solvent_html(),
             self.fragmentation_html(),
             self.symmetry_html(),
             self.charge_mult_html(),
             self.open_shell_html(),
             self.scf_energy_html(),
             self.scf_failed_html(),
-            self.solvent_html(),
             self.coupled_cluster_html(),
             self.t1_diagnostics_html()
         ]
@@ -113,21 +115,28 @@ class Job(Top_ReportGenerator):
 
         P = self.parsed
         jobtype = P.last_value('P_jobtype')
-        if not jobtype:
+
+        if jobtype is None:
             self.add_both(NoJobType(self.we, P).report())
             return self.get_cells()
 
-        # P is wrapped in the aggregation order: scan > irc > opt;
-        for name,Gen in zip(('scan','irc','opt'),(Scan,IRC,Opt)):
-            if name in jobtype:
-                self.add_both(Gen(self.we, P).report())
+        job_type_found = False
+        job_types = {'scan':Scan,'irc':IRC,'opt':Opt}
+        for name,Gen in job_types.items():
+            if name not in jobtype:
+                continue
+            P = P.separate(name)
+            self.add_both(Gen(self.we, P).report())
+            job_type_found = True
+            break
+        if 'freq' in jobtype:
+            if 'opt' in jobtype and P.last_value('P_opt_ok') != 'True':
+                self.add_both(Freq(self.we, P.data[-1]).report())
             else:
-                P = P.data[0]
+                self.add_both(Freq(self.we, P).report())
+            return self.get_cells()
 
-        if 'freq' in jobtype and not ('opt' in jobtype and P.last_value('P_opt_ok')!='True'):
-            self.add_both(Freq(self.we, P).report())
-
-        if 'sp' in jobtype:
+        if not job_type_found:
             self.add_both(SinglePoint(self.we, P).report())
 
         return self.get_cells()

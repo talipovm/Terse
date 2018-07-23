@@ -73,6 +73,13 @@ class Opt(Top_ReportGenerator):
             ]
         return "; ".join(cmd)
 
+    def jobtype_html(self):
+        sx = self.strong_tag('OPT')
+        if self.opt_ok:
+            return sx
+        else:
+            return self.color_tag(sx, 'err')
+
     def report_text(self):
         if not self.opt_ok:
             self.add_right('Geometry optimization is incomplete!')
@@ -95,7 +102,7 @@ class Opt(Top_ReportGenerator):
         else:
             self.add_left(self.color_tag('No coordinates found!','err'))
 
-        self.add_right(self.strong_tag("OPT"))
+        self.add_right(self.jobtype_html())
         self.add_right(self.br_tag)
 
         self.add_right(self.opt_steps())

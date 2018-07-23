@@ -15,7 +15,7 @@ def tag(s, t, intag=''):
     return "<%(tag)s %(intag)s>\n%(tagbody)s</%(tag)s>\n" % {'tag': t, 'intag': intag, 'tagbody': shifted}
 
 def img(source,width='450'):
-    return "<img src='%s' width=%s\n"  % (source,str(width))
+    return "<img src='%s' width=%s>\n"  % (source,str(width))
 
 def color(s, col_type):
     from Top import Top

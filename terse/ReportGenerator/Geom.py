@@ -7,27 +7,32 @@ log = logging.getLogger(__name__)
 
 class Geom(Top_ReportGenerator):
 
-    def __init__(self,we,parsed,show_vibration=None):
+    def __init__(self,we,parsed,show_vibration=None,start_skip=0,end_skip=0):
         # super().__init__(we,parsed) # cannot call it
         self.we = we
         self.parsed = parsed
         self.bohr_units = self.parsed.last_value('P_geom_bohr') != 'empty'
-        self.geom = self.parsed.last_value('P_geom')
+        self.geom_raw = self.parsed.last_value('P_geom')
+        self.geom = list()
         self.show_vibration = show_vibration
         self.comment = ''
         self.coord = list()
         self.vibs = list()
         self.vectors = list()
+        self.start_skip=start_skip
+        self.end_skip=end_skip
         self.prepare_for_report()
         self.prepare_comments()
 
     def prepare_for_report(self):
-        if self.geom is None:
+        if self.geom_raw is None:
             return None
-        for atom in self.geom:
+        for atom_raw in self.geom_raw:
+            atom = atom_raw.copy()
             atom[0] = to_element_name(atom[0])
             if self.bohr_units:
                 atom[1:] = [str(float(q)*BohrR) for q in atom[1:]]
+            self.geom.append(atom)
         self.coord = [' '.join(atom) for atom in self.geom]
 
         if self.show_vibration is not None:
@@ -47,7 +52,9 @@ class Geom(Top_ReportGenerator):
             for vs in all_displacement:
                 for v in zip(*vs):
                     self.vibs.append(misc.split(v, 3))
+        del self.vibs[self.start_skip:self.end_skip]
         self.vectors = [' '.join(dq) for dq in self.vibs[self.show_vibration]]
+        return
 
     def __str__(self):
         if not self.coord:

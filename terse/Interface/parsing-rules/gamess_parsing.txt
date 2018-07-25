@@ -11,17 +11,160 @@ if [0]' MPLEVL=':
 endif 
 
 if [0]' DFTTYP=':
-    dft,tddft = /^ DFTTYP=\s*(\S+)\s*TDDFT =\s*(\S+)/
+    dft = /^ DFTTYP=\s*(\S+)/
+    if /TDDFT =EXCITE/:
+        tddft = 'True'
+    endif
+endif
+
+if [0]' CIMTYP=':
+    cimtyp = /^ CIMTYP=\s*(\S+)/
+endif
+
+if [0]'            CONSTRAINED UHF BY J.N.BYRD AND J.A.MONTGOMERY':
+    additional_method = 'Constrained UHF'
+endif
+
+if [0]' GRIMME'S EMPIRICAL DISPERSION CORRECTION= T':
+    additional_method = 'Dispersion corr.'
+endif
+
+if [0]' DFT-D3 PARAMETERS WILL BE LOADED AND PRINTED':
+    additional_method = 'D3'
+endif
+
+if [0]'     LONG RANGE CORRECTION= T':
+    additional_method = 'LC'
+endif
+
+if [0]'          COMPOSITE METHOD ACCESSED:':
+    composite = /^          COMPOSITE METHOD ACCESSED:\s*(\S+)/
+endif
+
+if [0]'    COMPOSITE METHODS AND CALCULATIONS':
+    composite = 'Composite method (N/A)'
 endif
 
 if [0]' DETERMINANTAL MULTIREFERENCE 2ND ORDER PERTURBATION THEORY (MRPT2)':
     scftyp = 'MRPT2'
 endif
 
+if [0]' NDFTB  =':
+    ndftb,scc,dftb3 = /NDFTB  =\s*(\S+)\s+SCC    =\s*(\S+)\s+DFTB3  =\s*(\S+)\s+/
+endif
+
+if [0]' - TURN ON A PRELIMINARY VERSION OF LONG-RANGE CORRECTED DFTB':
+    lcdftb = 'True'
+endif
+
+# basis set
+if [0]'     GBASIS=':
+    gbasis,igauss,polar = /^     GBASIS=\s*(\S+)\s+IGAUSS=\s*(\S+)\s+POLAR=\s*(\S+)/
+endif
+
+if [0]'     NDFUNC=':
+    ndfunc,nffunc,diffsp = /^     NDFUNC=\s*(\S+)\s+NFFUNC=\s*(\S+)\s+DIFFSP=\s*(\S+)/
+endif
+
+if [0]'     NPFUNC=':
+    npfunc,diffs,basnam=/^     NPFUNC=\s*(\S+)\s+DIFFS=\s*(\S+)\s+BASNAM=\s*(\S+)/
+endif
+
+# external file
+if [0]'     $BASIS REQUESTS READING THE':
+    gbasis = /BASIS REQUESTS READING THE "(.*)"/
+endif
+
+if [0]' THE POINT GROUP OF THE MOLECULE IS':
+    sym = /^ THE POINT GROUP OF THE MOLECULE IS\s+(\S+)/
+    safejump(1)
+    sym_axis = /^ THE ORDER OF THE PRINCIPAL AXIS IS\s+(\S+)/
+endif
+
+if [0]' NUMBER OF CARTESIAN ATOMIC ORBITALS=':
+    naos = /^ NUMBER OF CARTESIAN ATOMIC ORBITALS=\s*(\S+)/
+endif
+
+if [0]' NUMBER OF CARTESIAN GAUSSIAN BASIS FUNCTIONS =':
+    naos = /^ NUMBER OF CARTESIAN GAUSSIAN BASIS FUNCTIONS =\s*(\S+)/
+    nmos = /^ NUMBER OF CARTESIAN GAUSSIAN BASIS FUNCTIONS =\s*(\S+)/
+endif
+
+if [0]' NUMBER OF OCCUPIED ORBITALS (ALPHA)          =':
+    nocc = /^ NUMBER OF OCCUPIED ORBITALS \(ALPHA\)          =\s*(\S+)/
+endif
+
+if [0]' TOTAL NUMBER OF MOS IN VARIATION SPACE=':
+    nmos = /^ TOTAL NUMBER OF MOS IN VARIATION SPACE=\s*(\S+)/
+endif
+
+if [0]' THE NUMBER OF SPHERICAL HARMONICS KEPT IN THE VARIATION SPACE IS':
+    nmos = /^ THE NUMBER OF SPHERICAL HARMONICS KEPT IN THE VARIATION SPACE IS\s*(\S+)/
+endif
+
+if [0]' TOTAL NUMBER OF ATOMIC ORBITALS       =':
+    nmos = /NUMBER OF ATOMIC ORBITALS:\s*(\S+)/
+endif
+
+if [0]' SET, THE NUMBER OF SPHERICAL HARMONICS KEPT IN THE VARIATION SPACE IS':
+    nmos = /\s+(\S+)$/
+endif
+
+
+if [0]' TOTAL NUMBER OF ATOMS                        =':
+    natoms = /^ TOTAL NUMBER OF ATOMS                        =\s*(\S+)/
+endif
+
+# FMO
+if [0]' Number of atoms:':
+    natoms = /Number of atoms:\s*(\S+)/
+endif
+
+# Divide-and-conquer
+if [0]'               $DANDC OPTIONS':
+    dc = 'True'
+endif
+
+# FMO
+if [0]' N-body FMO method':
+    fmo_level = /N-body FMO method:\s*(\S+)/
+endif
+
+if [0]'     SUMMARY OF THE EFFECTIVE FRAGMENT POTENTIAL MODEL CHOSEN':
+    efp = 'True'
+endif
+
+
 if [0]'          IHREP  =':
     hssend = /HSSEND =\s*(\S+)/
 endif
 
+if [0]'     ATOMIC MULLIKEN POPULATION IN EACH MOLECULAR ORBITAL':
+    jump(ceiling(nocc/5)*(natoms+5))
+endif
+
+if [0]' SPIN MULTIPLICITY                            =':
+    mult = /^ SPIN MULTIPLICITY                            =\s*(\S+)/
+endif
+
+if [0]' CHARGE OF MOLECULE                           =':
+    charge = /^ CHARGE OF MOLECULE                           =\s*(\S+)/
+endif
+
+if [0]'     SOLVNT=':
+    solvent = /SOLVNT=\s*(\S+)/
+endif
+
+if [0]'     $SCRF OPTIONS':
+    solvent = '?'
+    solv_model = 'N/A'
+endif
+
+if [0]'     INPUT FOR':
+    solv_model = /INPUT FOR\s*(.*)\s+SOLVATION CALCULATION/
+endif
+
+# SCF Convergence
 if [0]' ITER EX':
     scf_started = 'True'
     table(scf_progress,run_until=//):
@@ -56,21 +199,12 @@ if [0]'          LAGRANGIAN CONVERGED':
     scf_done = 'True'
 endif
 
-# FMO
-if [0]'                  The Fragment Molecular Orbital (FMO) method':
-    fmo = 'True'
-endif
-
-if [0]' N-body FMO method':
-    fmo_level = /N-body FMO method:\s*(\S+)/
-endif
-
-# FMO
+# FMO unconverged
 if [18]'energies diverged!!! The total properties are not meaningful':
     scf_notconv = 'True'
 endif
     
-# FMO
+# FMO2 energy
 if [0]' Total energy of the molecule: Euncorr(2)':
     dftb_energy = /Total energy of the molecule: Euncorr\(2\)=\s*(\S+)/
     if /Euncorr\(2\)=\s*-/:
@@ -78,11 +212,12 @@ if [0]' Total energy of the molecule: Euncorr(2)':
     endif
 endif
 
-# FMO
+# total charge for FMO
 if [0]' Total charge:':
     charge = /Total charge:\s+(\S+)/
 endif
 
+# total mult for FMO
 if [0]'Total spin multiplicity:':
     mult = /Total spin multiplicity:\s+(\S+)/
 endif
@@ -117,29 +252,6 @@ if [0]' T1 DIAGNOSTIC        =':
 endif
 
 
-# basis set
-if [0]'     GBASIS=':
-    gbasis,igauss,polar = /^     GBASIS=\s*(\S+)\s+IGAUSS=\s*(\S+)\s+POLAR=\s*(\S+)/
-endif
-
-if [0]'     $BASIS REQUESTS READING THE':
-    gbasis = /BASIS REQUESTS READING THE "(.*)"/
-endif
-
-if [0]'     NDFUNC=':
-    ndfunc,nffunc,diffsp = /^     NDFUNC=\s*(\S+)\s+NFFUNC=\s*(\S+)\s+DIFFSP=\s*(\S+)/
-endif
-
-if [0]'     NPFUNC=':
-    npfunc,diffs,basnam=/^     NPFUNC=\s*(\S+)\s+DIFFS=\s*(\S+)\s+BASNAM=\s*(\S+)/        
-endif
-
-if [0]' THE POINT GROUP OF THE MOLECULE IS':
-    sym = /^ THE POINT GROUP OF THE MOLECULE IS\s+(\S+)/
-    safejump(1)
-    sym_axis = /^ THE ORDER OF THE PRINCIPAL AXIS IS\s+(\S+)/
-endif
-
 if [0]' BEGINNING GEOMETRY SEARCH POINT NSERCH=':
     new_step = /^ BEGINNING GEOMETRY SEARCH POINT NSERCH=\s*(\S+)/
 endif
@@ -154,88 +266,23 @@ if [0]'          AT PATH DISTANCE STOTAL =':
     irc_energy = /          TOTAL ENERGY            =\s*(\S+)/
 endif
 
-if [0]' NUMBER OF CARTESIAN ATOMIC ORBITALS=':
-    naos = /^ NUMBER OF CARTESIAN ATOMIC ORBITALS=\s*(\S+)/
-endif
 
-if [0]' NUMBER OF CARTESIAN GAUSSIAN BASIS FUNCTIONS =':
-    naos = /^ NUMBER OF CARTESIAN GAUSSIAN BASIS FUNCTIONS =\s*(\S+)/
-    nmos = /^ NUMBER OF CARTESIAN GAUSSIAN BASIS FUNCTIONS =\s*(\S+)/
-endif
-
-if [0]' TOTAL NUMBER OF MOS IN VARIATION SPACE=':
-    nmos = /^ TOTAL NUMBER OF MOS IN VARIATION SPACE=\s*(\S+)/
-endif
-
-if [0]' THE NUMBER OF SPHERICAL HARMONICS KEPT IN THE VARIATION SPACE IS':
-    nmos = /^ THE NUMBER OF SPHERICAL HARMONICS KEPT IN THE VARIATION SPACE IS\s*(\S+)/
-endif
-
-if [0]' TOTAL NUMBER OF ATOMIC ORBITALS       =':
-    nmos = /NUMBER OF ATOMIC ORBITALS:\s*(\S+)/
-endif
-
-if [0]' SET, THE NUMBER OF SPHERICAL HARMONICS KEPT IN THE VARIATION SPACE IS':
-    nmos = /\s+(\S+)$/
-endif
-
-
-if [0]' TOTAL NUMBER OF ATOMS                        =':
-    natoms = /^ TOTAL NUMBER OF ATOMS                        =\s*(\S+)/
-endif
-
-if [0]' Number of atoms:':
-    natoms = /Number of atoms:\s*(\S+)/
-endif
-
+# Skip them
 if [0]'          EIGENVECTORS':
     jump(ceiling(nmos/5)*(naos+4))
 endif
 
+# Skip them
 if [0]'          ----- MULLIKEN ATOMIC OVERLAP POPULATIONS -----':
     jump(ceiling(natoms/5)*ceiling((2*natoms-5*(ceiling(natoms/5)-1)+6)/2))
 endif
 
-if [0]' NUMBER OF OCCUPIED ORBITALS (ALPHA)          =':
-    nocc = /^ NUMBER OF OCCUPIED ORBITALS \(ALPHA\)          =\s*(\S+)/
-endif
 
-if [0]'     ATOMIC MULLIKEN POPULATION IN EACH MOLECULAR ORBITAL':
-    jump(ceiling(nocc/5)*(natoms+5))
-endif
-
-if [0]' SPIN MULTIPLICITY                            =':
-    mult = /^ SPIN MULTIPLICITY                            =\s*(\S+)/
-endif
-
-if [0]' CHARGE OF MOLECULE                           =':
-    charge = /^ CHARGE OF MOLECULE                           =\s*(\S+)/
-endif
-
-if [0]'     SOLVNT=':
-    solvent = /SOLVNT=\s*(\S+)/
-endif
-
-if [0]'     $SCRF OPTIONS':
-    solvent = '?'
-    solv_model = 'N/A'
-endif
-
-if [0]'     INPUT FOR':
-    solv_model = /INPUT FOR\s*(.*)\s+SOLVATION CALCULATION/
-endif
-
-if [0]' NDFTB  =':
-    ndftb,scc,dftb3 = /NDFTB  =\s*(\S+)\s+SCC    =\s*(\S+)\s+DFTB3  =\s*(\S+)\s+/
-endif
 
 if [0]'          S-SQUARED =':
     S2 = /^          S-SQUARED =\s*(\S+)/
 endif
 
-if [0]' - TURN ON A PRELIMINARY VERSION OF LONG-RANGE CORRECTED DFTB':
-    lcdftb = 'True'
-endif
 
 if [0]'          MAXIMUM GRADIENT':
     max_force, rms_force = characters([29-38],[57-66])
@@ -249,22 +296,7 @@ if [0]'1     ***** SADDLE POINT LOCATED *****':
     opt_ok = 'True'
 endif
 
-if [0]'     THERMOCHEMISTRY AT T=':
-    thermo_temp = /^     THERMOCHEMISTRY AT T=\s+(\S+)/
-endif
 
-if [0]' EXECUTION OF GAMESS TERMINATED NORMALLY':
-    term_ok = 'True'
-endif
-
-if [0]'              E         H         G         CV        CP        S':
-    safejump(1)
-    if /^           KJ/:
-        safejump(5)
-        thermo_units = 'kJ/mol'
-        thermo_e_corr, thermo_h_corr, thermo_g_corr = /TOTAL\s*(\S+)\s*(\S+)\s*(\S+)/
-    endif
-endif
 
 if [0]' COORDINATES OF ALL ATOMS ARE (ANGS)':
     is_geom_ang = 'True'
@@ -282,6 +314,20 @@ if [0]' ATOM      ATOMIC                      COORDINATES (BOHR)':
         row = field(2-5)
         safejump(1)
     endtable
+endif
+
+
+if [0]'     THERMOCHEMISTRY AT T=':
+    thermo_temp = /^     THERMOCHEMISTRY AT T=\s+(\S+)/
+endif
+
+if [0]'              E         H         G         CV        CP        S':
+    safejump(1)
+    if /^           KJ/:
+        safejump(5)
+        thermo_units = 'kJ/mol'
+        thermo_e_corr, thermo_h_corr, thermo_g_corr = /TOTAL\s*(\S+)\s*(\S+)\s*(\S+)/
+    endif
 endif
 
 if [0]'       FREQUENCY:':
@@ -313,6 +359,7 @@ if [0]'          TOTAL MULLIKEN AND LOWDIN ATOMIC POPULATIONS':
     endtable
 endif
 
+# skip FMO convergence
 if [0]' RHF      monomer':
     jump ' Dipole moment D'
 endif
@@ -323,7 +370,7 @@ troublemaker /^ DDI:.*used by master data server/:
     jump(1)
 endtroublemaker
 
-
+# DRC:
 #   TIME     MODE     Q              P     KINETIC      POTENTIAL          TOTAL
 #    FS       BOHR*SQRT(AMU) BOHR*SQRT(AMU)/FS   E         ENERGY         ENERGY
 #    0.1000  L 1      1.013279  0.052823   0.00159       -9.12870       -9.12710
@@ -354,8 +401,10 @@ if [0]'   TIME     MODE     Q              P     KINETIC      POTENTIAL         
     endtable
 endif
 
-if [0]'     SUMMARY OF THE EFFECTIVE FRAGMENT POTENTIAL MODEL CHOSEN':
-    efp = 'True'
+
+
+if [0]' EXECUTION OF GAMESS TERMINATED NORMALLY':
+    term_ok = 'True'
 endif
 
 # vim: filetype=awk

@@ -1,59 +1,157 @@
 # [PROCESSING RULES]
 
-# QM METHOD:
+#################
+### QM METHOD ###
+#################
 
 mplevl=2 -> wftype=MP2
 mplevl=3 -> wftype=MP3
 mplevl=4 -> wftype=MP4
 mplevl=5 -> wftype=MP5
 
-cityp=NONE -> cityp=empty
-last_value(cityp) -> wf_cityp
-nonempty(wf_cityp) -> wftype
-
-cctyp=NONE -> cctyp=empty
-last_value(cctyp) -> wf_cctyp
-nonempty(wf_cctyp) -> wftype
-
-runtyp=HESSIAN -> runtyp=freq
-runtyp=IRC -> runtyp=irc
-hssend=T -> runtyp=freq
-dft=NONE -> dft=empty
-last_value(dft) -> wf_dft
-nonempty(wf_dft) -> wftype
-
 ndftb=2 -> wftype=DFTB2
 ndftb=3 -> wftype=DFTB3
+
+gbasis=MNDO -> wftype=MNDO
+gbasis=AM1 -> wftype=AM1
+gbasis=PM3 -> wftype=PM3
+gbasis=RM1 -> wftype=RM1
+
+lcdftb=True -> wftype='LC-DFTB2 (or 3)'
+
+last_value(composite) -> end_composite
+nonempty(end_composite) -> gbasis
+
+nonempty(composite) -> wftype
+runtyp=G3MP2 -> wftype=G3MP2
+runtyp=G3MP2 -> JobType=opt
+
+cctyp=CR-CC(Q) -> cctyp=CR-CCSD(TQ)
+cctyp=CR-CC -> cctyp=CR-CCSD(T)
+cctyp=CR-CCL -> cctyp=CR-CC(2,3)
+cctyp=CR-EOM -> cctyp=CR-EOMCCSD(T)
+
+last_value(cityp) -> wf_cityp
+wf_cityp=NONE -> wf_cityp=empty
+nonempty(wf_cityp) -> wftype
+
+last_value(cimtyp) -> wf_cimtyp
+wf_cimtyp=NONE -> wf_cimtyp=empty
+nonempty(wf_cimtyp) -> wftype
+
+last_value(cctyp) -> wf_cctyp
+wf_cctyp=NONE -> wf_cctyp=empty
+nonempty(wf_cctyp) -> wftype
+
+last_value(dft) -> wf_dft
+wf_dft=NONE -> wf_dft=empty
+nonempty(wf_dft) -> wftype
+
+scftyp -> to_empty(wftype)
+
+
+#########################
+### QM METHOD; LINE 2 ###
+#########################
+
+
+
+############################
+### FRAGMENTATION SCHEME ###
+############################
 
 fmo_level=2 -> wftype_fragment='FMO2'
 fmo_level=3 -> wftype_fragment='FMO3'
 efp=True -> wftype_fragment='EFP'
+dc=True -> wftype_fragment='DC'
 
-lcdftb=True -> wftype='LC-DFTB2 (or 3)'
 
+#################
+### BASIS SET ###
+#################
 
-# ENERGY
 gbasis=DFTB -> gbasis='minimal basis set'
+gbasis=ACCD -> gbasis='aug-cc-pVDZ'
+gbasis=ACCT -> gbasis='aug-cc-pVTZ'
+gbasis=ACCQ -> gbasis='aug-cc-pVQZ'
+gbasis=ACC5 -> gbasis='aug-cc-pV5Z'
+gbasis=ACC6 -> gbasis='aug-cc-pV6Z'
+
+gbasis=CCD -> gbasis='cc-pVDZ'
+gbasis=CCT -> gbasis='cc-pVTZ'
+gbasis=CCQ -> gbasis='cc-pVQZ'
+gbasis=CC5 -> gbasis='cc-pV5Z'
+gbasis=CC6 -> gbasis='cc-pV6Z'
+
+gbasis=CCDC -> gbasis='cc-pCVDZ'
+gbasis=CCTC -> gbasis='cc-pCVTZ'
+gbasis=CCQC -> gbasis='cc-pCVQZ'
+gbasis=CC5C -> gbasis='cc-pCV5Z'
+gbasis=CC6C -> gbasis='cc-pCV6Z'
+
+gbasis=ACCDC -> gbasis='aug-cc-pCVDZ'
+gbasis=ACCTC -> gbasis='aug-cc-pCVTZ'
+gbasis=ACCQC -> gbasis='aug-cc-pCVQZ'
+gbasis=ACC5C -> gbasis='aug-cc-pCV5Z'
+gbasis=ACC6C -> gbasis='aug-cc-pCV6Z'
+
+gbasis=CCDWC -> gbasis='cc-pwCVDZ'
+gbasis=CCTWC -> gbasis='cc-pwCVTZ'
+gbasis=CCQWC -> gbasis='cc-pwCVQZ'
+gbasis=CC5WC -> gbasis='cc-pwCV5Z'
+gbasis=CC6WC -> gbasis='cc-pwCV6Z'
+
+gbasis=ACCDWC -> gbasis='aug-cc-pwCVDZ'
+gbasis=ACCTWC -> gbasis='aug-cc-pwCVTZ'
+gbasis=ACCQWC -> gbasis='aug-cc-pwCVQZ'
+gbasis=ACC5WC -> gbasis='aug-cc-pwCV5Z'
+gbasis=ACC6WC -> gbasis='aug-cc-pwCV6Z'
+
+##############
+### ENERGY ###
+##############
+
 gbasis=DFTB -> SCF_energy=empty
 dftb_energy -> final_SCF_energy
 nonempty(SCF_energy) -> final_SCF_energy
-final_SCF_energy -> P_scf_e
-
-irc_energy -> P_irc_energy
-irc_coord -> P_irc_coord
 
 
-# JOB TYPE
-join_unique(runtyp) -> P_unknown_jobtype
+################
+### GEOMETRY ###
+################
+
+is_geom_ang='True' -> geom_bohr='empty' # if geometry is available in Angstroms, ignore that in bohrs
+nonempty(geom_bohr) -> geom            # if geometry in Bohrs was not ignored, use it
+
+
+################
+### JOB TYPE ###
+################
+
 runtyp=ENERGY -> JobType=sp
-tddft=T -> JobType='TD-DFT'
+tddft=True -> excitation='TD-DFT'
 runtyp=OPTIMIZE -> JobType=opt
-runtyp=freq -> JobType=freq
-runtyp=irc -> JobType=irc
+runtyp=HESSIAN -> JobType=freq
+hssend=T -> JobType=freq
+runtyp=IRC -> JobType=irc
 runtyp=DRC -> JobType=drc
+
+
+##################
+### MAP TO P_* ###
+##################
+
+# VARIABLES STARTING WITH P_ ARE USED BY THE HTML REPORT GENERATOR
+
+join_unique(runtyp) -> P_unknown_jobtype
+join_unique(JobType) -> P_jobtype
 
 last_value(solvent) -> P_solvent
 last_value(solv_model) -> P_solv_model
+
+wftype -> P_wftype
+gbasis -> P_basis
+wftype_fragment -> P_wftype_fragment # e.g. FMO
 
 last_value(sym) -> P_sym
 sym_axis=0 -> sym_axis=empty
@@ -62,19 +160,8 @@ nonempty(sym_axis) -> P_sym_axis
 last_value(charge) -> P_charge
 last_value(mult) -> P_mult
 
-wftype=UHF -> P_open_shell=True
-
-ccsd_pTp_energy -> P_ccsd_pTp_energy
-T1_diagnostic -> P_T1_diagnostic
-
-is_geom_ang='True' -> geom_bohr='empty' # if geometry is available in Angstroms, ignore that in bohrs
-nonempty(geom_bohr) -> geom            # if geometry in Bohrs was not ignored, use it
-
-last_value(start_skip_freq) -> P_start_skip_freq
-last_value(end_skip_freq) -> P_end_skip_freq
-last_value(start_im_freq) -> P_start_im_freq
-last_value(end_im_freq) -> P_end_im_freq
-
+scftyp=UHF -> P_open_shell=UHF
+scftyp=ROHF -> P_open_shell=ROHF
 
 last_value(scf_started) -> P_scf_started
 last_value(scf_done) -> P_scf_done
@@ -82,18 +169,30 @@ last_value(scf_done) -> P_scf_done
 scf_notconv='True' -> P_scf_done='False'
 scf_progress -> P_scf_progress
 
+join_unique(additional_method) -> P_additional_method
+
+final_SCF_energy -> P_scf_e
+
 S2 -> P_S2
 separate_columns(charges_mull_low) -> P_charges_Mulliken,P_charges_Lowdin
 
-scftyp -> to_empty(wftype)
+ccsd_pTp_energy -> P_ccsd_pTp_energy
+T1_diagnostic -> P_T1_diagnostic
 
-# VARIABLES STARTING WITH P_ ARE USED BY THE HTML REPORT GENERATOR
+last_value(start_skip_freq) -> P_start_skip_freq
+last_value(end_skip_freq) -> P_end_skip_freq
+last_value(start_im_freq) -> P_start_im_freq
+last_value(end_im_freq) -> P_end_im_freq
+
+irc_energy -> P_irc_energy
+irc_coord -> P_irc_coord
 
 opt_ok -> P_opt_ok
 geom_bohr -> P_geom_bohr
 geom -> P_geom
 max_force -> P_max_force
 rms_force -> P_rms_force
+
 vibrations -> P_vibrations # vibration vectors
 freqs -> P_freqs # in cm-1
 
@@ -107,13 +206,10 @@ drc_time -> P_drc_time
 drc_poten -> P_drc_poten
 
 term_ok -> P_term_ok
-join_unique(JobType) -> P_jobtype
-wftype -> P_wftype
-gbasis -> P_basis
-wftype_fragment -> P_wftype_fragment # e.g. FMO
 
 last_value(new_step) -> P_opt_iter
 
+last_value(excitation) -> P_excitation
 aggregate_before(scan) -> scan
 aggregate_before(new_irc) -> irc
 aggregate_before(new_step) -> opt # use new_step as separator for the geometry optimization steps

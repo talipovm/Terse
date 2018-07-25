@@ -37,9 +37,25 @@ class Job(Top_ReportGenerator):
 
     def level_of_theory_html(self):
         method = self.parsed.last_value('P_wftype')
+        if method is None:
+            method = 'N/A'
         basis = self.parsed.last_value('P_basis')
-        lot = "%s / %s" % (method,basis)
-        return self.color_tag(lot.upper(), 'lot')
+        if basis is None:
+            basis = 'N/A'
+        lot = "Method: %s\n" % method
+        lot += self.br_tag
+        lot += "Basis: %s\n" % basis
+
+        additional_method = self.parsed.last_value('P_additional_method')
+        if additional_method:
+            lot += self.br_tag + "; ".join(additional_method)
+        return self.color_tag(lot, 'lot')
+
+    def excitation(self):
+        exc = self.parsed.last_value('P_excitation')
+        if exc is not None:
+            s = "Electronic Excitation: %s\n" % exc
+            return self.color_tag(s, 'lot')
 
     def fragmentation_html(self):
         P = self.parsed
@@ -61,8 +77,10 @@ class Job(Top_ReportGenerator):
         return charge + mult
 
     def open_shell_html(self):
-        if self.parsed.last_value('P_open_shell')== 'True':
-            return "Open Shell; S2= %s,\n" % self.parsed.last_value('P_S2')
+        if self.parsed.last_value('P_open_shell')=='UHF':
+            return "Open Shell (UHF); S2= %s,\n" % self.parsed.last_value('P_S2')
+        elif self.parsed.last_value('P_open_shell')=='ROHF':
+            return self.color_tag("ROHF\n",'lot')
 
     def scf_energy_html(self):
         try:
@@ -102,11 +120,12 @@ class Job(Top_ReportGenerator):
         out_html = [
             #self.jobtype_html(),
             self.level_of_theory_html(),
+            self.excitation(),
             self.solvent_html(),
             self.fragmentation_html(),
+            self.open_shell_html(),
             self.symmetry_html(),
             self.charge_mult_html(),
-            self.open_shell_html(),
             self.scf_energy_html(),
             self.scf_failed_html(),
             self.coupled_cluster_html(),

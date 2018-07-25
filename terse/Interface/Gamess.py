@@ -5,7 +5,7 @@ if __name__ == "__main__":
     sys.path.append(append_path)
 
 from Tools.file2 import file2
-from ElectronicStructure import ElectronicStructure
+from Top import Top
 from Processing.Processing import Processing
 from Grammar.Grammar import Grammar
 from ReportGenerator.ReportGenerator import ReportGenerator
@@ -14,12 +14,10 @@ import os.path
 import logging
 log = logging.getLogger(__name__)
 
-use_old_pickle = False
 
-class Gamess(ElectronicStructure):
+class Gamess(Top):
     """
     US GAMESS parser
-    Analyzes a multiple-step calculation (not really needed for GAMESS)
     """
 
     def __init__(self):
@@ -31,77 +29,76 @@ class Gamess(ElectronicStructure):
         self.processing_filename = os.path.join(os.path.dirname(__file__), "parsing-rules/gamess_processing.txt")
 
     def parse(self):
-        """
-        Parses GAMESS file
-        """
-
         GI = file2(self.parsing_filename)
         FI = file2(self.file)
 
-        if not use_old_pickle:
-            G = Grammar(GI, FI)
-            G.parse()
-            self.G_parsed = G.parsed_container
-        else:
-            import pickle
-            pickle.dump(G.parsed_container, open('Interface/G.p', 'wb'))
+        G = Grammar(GI, FI)
+        G.parse()
+        self.G_parsed = G.parsed_container
+
+        # import pickle
+        # pickle.dump(G.parsed_container, open('Interface/G.p', 'wb'))
+        # self.G_parsed = pickle.load(open('Interface/G.p', 'rb'))
 
         FI.close()
         GI.close()
+
         log.debug('%s parsed successfully' % (self.file))
         return
 
     def postprocess(self):
-        try:
-            PI = file2(self.processing_filename)
-            log.debug('%s with the processing instructions was opened for reading' % self.processing_filename)
-        except:
-            log.error('Cannot open %s for reading' % self.processing_filename)
 
-        if use_old_pickle:
-            # For the debugging purposes because it's faster
-            import pickle
-            self.G_parsed = pickle.load(open('Interface/G.p', 'rb'))
-
-        # When the code is ready uncomment it.
+        PI = file2(self.processing_filename)
         self.P = Processing(PI=PI, parsed=self.G_parsed)
         self.P.postprocess()
-        log.debug('%s postprocessed successfully' % (self.file))
 
+        # GAMESS-specific edits
+
+        P = self.P.parsed
+        basis_words = ('gbasis', 'igauss', 'polar', 'ndfunc', 'nffunc', 'diffsp', 'npfunc', 'diffs')
+        vals = list(P.last_value(s) if P.last_value(s) is not None else '' for s in basis_words)
+        b = dict(zip(basis_words,vals))
+
+        def polarf(plr, suffix):
+            if plr in ('0', ''):
+                return ''
+            if plr == '1':
+                return suffix
+            return plr + suffix
+
+        if b['gbasis']:
+            if b['gbasis'] in ('N21','N31','N311'):
+                basis = '%s-%s' % (b['igauss'],b['gbasis'][1:])
+                if 'T' in b['diffsp']:
+                    basis += '+'
+                    if 'T' in b['diffs']:
+                        basis += '+'
+                basis += 'G'
+
+                polar_heavy = polarf(b['ndfunc'],'d') + polarf(b['nffunc'],'f')
+                if polar_heavy:
+                    polar_H = polarf(b['npfunc'], 'p')
+                    if polar_H:
+                        polar = '(%s,%s)' % (polar_heavy,polar_H)
+                    else:
+                        polar = '(%s)' % polar_heavy
+                else:
+                    polar = ''
+
+                basis += polar
+                self.G_parsed.conditionally_add(old_key='P_basis',new_key='P_basis',new_value=basis)
+
+            if b['gbasis']=='STO':
+                basis = 'STO-%sG' % b['igauss']
+                if b['ndfunc']!='0':
+                    basis += '*'
+                self.G_parsed.conditionally_add(old_key='P_basis',new_key='P_basis',new_value=basis)
+
+        log.debug('%s postprocessed successfully' % (self.file))
 
     def webdata(self):
         """
-        Returns 2 strings with HTML code
+        Return 2 strings with HTML code
         """
         W = ReportGenerator(processed=self.P.parsed)
         return W.report()
-
-#    def usage(self):
-#        for step in self.steps:
-#            step.usage()
-
-if __name__ == "__main__":
-
-    DebugLevel = logging.DEBUG
-    logging.basicConfig(level=DebugLevel)
-
-    from Settings import Settings
-    from Top import Top
-    Top.settings = Settings(from_config_file= True)
-    Top.settings.selfPath=append_path
-
-    from Tools.HTML import HTML
-    WebPage = HTML()
-    WebPage.readTemplate()
-
-#    f = Orca()
-    # f.file = sys.argv[1]
-    #import profile
-    #profile.run('f.parse()')
-    # f.parse()
-    # f.postprocess()
-    #print(f.steps[0])
-    # b1, b2 = f.webdata()
-
-    #WebPage.addTableRow(str(f.file) + web.brn + b1, b2)
-    # WebPage.write()

@@ -44,7 +44,7 @@ class DRC(Top_ReportGenerator):
         s_geoms = "\n".join(v)
         if not s_geoms:
             return ''
-        return WebFile(fname='.xyz',content=s_geoms).write()
+        return WebFile(fname='-drc.xyz',content=s_geoms).write()
 
     def load_in_jmol(self, webpath):
         label = 'DRC, step @{_modelNumber}'

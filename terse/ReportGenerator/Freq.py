@@ -88,7 +88,7 @@ class Freq(Top_ReportGenerator):
         G = str(Geom(self.we, self.parsed, show_vibration=nvib,start_skip=self.start_skip_freq,end_skip=self.end_skip_freq))
         if not G:
             return ''
-        return WebFile(fname='.xyz', content=G).write()
+        return WebFile(fname='-freq.xyz', content=G).write()
 
     def load_in_jmol(self, webpath):
         cmd  = [

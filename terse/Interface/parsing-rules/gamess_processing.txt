@@ -193,8 +193,11 @@ geom -> P_geom
 max_force -> P_max_force
 rms_force -> P_rms_force
 
+join_unique(warnings) -> P_warnings
+
 vibrations -> P_vibrations # vibration vectors
 freqs -> P_freqs # in cm-1
+freqs_horizontal -> P_freqs_horizontal # in cm-1
 
 thermo_temp -> P_thermo_temp
 thermo_e_corr -> P_thermo_e_corr

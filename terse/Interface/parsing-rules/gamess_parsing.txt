@@ -37,6 +37,10 @@ if [0]'     LONG RANGE CORRECTION= T':
     additional_method = 'LC'
 endif
 
+if [0]' PP    =':
+    additional_method = 'ECP'
+endif
+    
 if [0]'          COMPOSITE METHOD ACCESSED:':
     composite = /^          COMPOSITE METHOD ACCESSED:\s*(\S+)/
 endif
@@ -330,12 +334,24 @@ if [0]'              E         H         G         CV        CP        S':
     endif
 endif
 
+#        FREQUENCY:        87.00 I     87.00 I     42.24       42.24        0.36
 if [0]'       FREQUENCY:':
-    safejump(5)
+    table(freqs_horizontal,run_until=(0)):
+        row = characters([22-30],[34-42],[46-54],[58-66],[70-78])
+    endtable
+    safejump /^$/
+    safejump(1)
     table(vibrations,run_until=//):
         row = characters([22-32],[34-44],[46-56],[58-68],[70-80])
         safejump(1)
     endtable
+endif
+
+if [0]'     * THIS IS NOT A STATIONARY POINT ON THE MOLECULAR PES *':
+    safejump(1)
+    if /THE VIBRATIONAL ANALYSIS IS NOT VALID/:
+        warnings = 'Not a stationary point on PES!'
+    endif
 endif
 
 if [0]'  MODE FREQ(CM**-1)  SYMMETRY  RED. MASS  IR INTENS':

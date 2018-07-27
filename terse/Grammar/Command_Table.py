@@ -24,10 +24,10 @@ class Command_Table(Top_Grammar):
         """
         s_re = re.search(r'table\((.*)\):', s) # syntax "if /xxx/:"
         if s_re is None:
-            raise SyntaxError
+            raise SyntaxError(s)
         s = s_re.group(1)
         if not (',' in s):
-            raise SyntaxError
+            raise SyntaxError(s)
         s = strip_all(s.split(','))
         self.key = s[0]
 

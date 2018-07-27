@@ -24,7 +24,7 @@ class LineCommandFactory(Top_Grammar):
         elif '=' in s:
             self.CmdClass = Command_Assign
         else:
-            raise SyntaxError
+            raise SyntaxError(s)
 
     def assign(self):
         return self.CmdClass(self.GI, self.FI, self.parsed_container, self.troublemakers)

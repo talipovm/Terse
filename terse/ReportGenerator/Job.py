@@ -112,6 +112,13 @@ class Job(Top_ReportGenerator):
                 s_T1 = self.color_tag(s_T1, 'err')
             return s_T1
 
+    def warnings(self):
+        wrn = self.parsed.last_value('P_warnings')
+        if wrn is not None and wrn:
+            s = self.br_tag.join(wrn)
+            return self.color_tag(s,'err')
+
+
     def report_text(self):
         pass
 
@@ -129,7 +136,8 @@ class Job(Top_ReportGenerator):
             self.scf_energy_html(),
             self.scf_failed_html(),
             self.coupled_cluster_html(),
-            self.t1_diagnostics_html()
+            self.t1_diagnostics_html(),
+            self.warnings()
         ]
         [self.add_right(s + self.br_tag) for s in out_html if s]
 

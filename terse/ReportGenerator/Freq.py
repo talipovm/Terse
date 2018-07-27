@@ -2,6 +2,7 @@ from ReportGenerator.Geom import Geom
 from ReportGenerator.Top_ReportGenerator import Top_ReportGenerator
 from ReportComponents.WebFile import WebFile
 from ReportGenerator.Charges import Charges
+import itertools
 
 import logging
 log = logging.getLogger(__name__)
@@ -43,7 +44,15 @@ class Freq(Top_ReportGenerator):
         self.freqs_cm = None
         self.im_freq = None
         if freq.last_value('P_freqs') is not None:
+            # useful when GAMESS prints out one freq per row
             self.freqs_cm = [float(fr[0]) for fr in freq.last_value('P_freqs')]
+
+        if freq.last_value('P_freqs_horizontal') is not None:
+            # useful when GAMESS prints out five freqs in a row
+            L = [item[0] for item in freq.get_value('P_freqs_horizontal')]
+            self.freqs_cm = [float(fr) for fr in itertools.chain(*L)]
+
+        if self.freqs_cm:
             if self.end_im_freq is not None:
                 for i in range(self.start_im_freq,self.end_im_freq):
                     self.freqs_cm[i] *= -1

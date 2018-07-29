@@ -12,7 +12,7 @@ endif
 
 if [0]' DFTTYP=':
     dft = /^ DFTTYP=\s*(\S+)/
-    if /TDDFT =EXCITE/:
+    if /TDDFT =(?!NONE)/:
         tddft = 'True'
     endif
 endif
@@ -38,8 +38,14 @@ if [0]'     LONG RANGE CORRECTION= T':
 endif
 
 if [0]' PP    =':
-    if /^(?! PP    =NONE)/:
+    if /^ PP    =(?!NONE)/:
         additional_method = 'ECP'
+    endif
+    if /RELWFN=(?!NONE)/:
+        additional_method = 'RELWFN'
+    endif
+    if /LOCAL =(?!NONE)/:
+        additional_method = 'LOCAL'
     endif
 endif
     
@@ -179,8 +185,25 @@ if [0]'     $SCRF OPTIONS':
     solv_model = 'N/A'
 endif
 
+if [0]' SS(V)PE  (LONG-RANGE DIELECTRIC) SOLVATION ENERGY':
+    solvent = '?'
+    solv_model = 'SS(V)PE'
+endif
+
+if [0]'          -SVP- SOLVENT':
+    solvent = '?'
+    solv_model = 'SVP'
+endif
+
+
 if [0]'     INPUT FOR':
-    solv_model = /INPUT FOR\s*(.*)\s+SOLVATION CALCULATION/
+    if /INPUT FOR AQUEOUS SMVLE CALCULATION/:
+        solvent = 'WATER'
+        solv_model = 'SMVLE'
+    endif
+    if /INPUT FOR (?!AQUEOUS SMVLE)/:
+        solv_model = /INPUT FOR\s*(.*)\s+SOLVATION CALCULATION/
+    endif
 endif
 
 # SCF Convergence
@@ -329,6 +352,9 @@ if [0]'1     ***** SADDLE POINT LOCATED *****':
     opt_ok = 'True'
 endif
 
+if [0]'      ***** SADDLE POINT LOCATED *****':
+    opt_ok = 'True'
+endif
 
 
 if [0]' COORDINATES OF ALL ATOMS ARE (ANGS)':
@@ -343,7 +369,7 @@ endif
 if [0]' ATOM      ATOMIC                      COORDINATES (BOHR)':
     is_geom_bohr = 'True'
     safejump(2)
-    table(geom_bohr,run_until=//):
+    table(geom_bohr,run_while=/\s+-?\d*\.\d*\s+-?\d*\.\d*\s+-?\d*\.\d*/):
         row = field(2-5)
         safejump(1)
     endtable
@@ -463,6 +489,9 @@ if [0]'          HARMONICALLY CONSTRAINED BOND LENGTHS':
     endtable
 endif
 
+if [0]'  QUANTUM CHEMISTRY POLARIZABLE FORCE FIELD PROGRAM':
+    additional_method = 'QUANPOL'
+endif
 
 if [0]' EXECUTION OF GAMESS TERMINATED NORMALLY':
     term_ok = 'True'

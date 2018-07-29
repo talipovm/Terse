@@ -132,6 +132,8 @@ nonempty(geom_bohr) -> geom            # if geometry in Bohrs was not ignored, u
 runtyp=ENERGY -> JobType=sp
 tddft=True -> excitation='TD-DFT'
 runtyp=OPTIMIZE -> JobType=opt
+runtyp=SADPOINT -> JobType=opt
+runtyp=SADPOINT -> additional_method=TS
 runtyp=HESSIAN -> JobType=freq
 hssend=T -> JobType=freq
 runtyp=IRC -> JobType=irc

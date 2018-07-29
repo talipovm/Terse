@@ -55,8 +55,10 @@ class Opt(Top_ReportGenerator):
         return "Steps: %s" % self.n_steps
 
     def measurements(self):
-        out = ['measure %s %s' % tuple(m) for m in self.measure_bonds]
-        return "; ".join(out)
+        if self.measure_bonds:
+            out = ['measure %s %s' % tuple(m) for m in self.measure_bonds]
+            return "; ".join(out)
+        return ''
 
     def save_geom(self):
         v = [str(Geom(self.we,g)) for g in self.parsed_g]

@@ -58,11 +58,6 @@ class Command_Table(Top_Grammar):
         table = []
         try:
             while True:
-                for cmd in self.commands:
-                    row = cmd.execute()
-                    if row:
-                        table.append(row)
-
                 # has the table end been reached?
                 if self.mode == 'run_until':
                     if self.condition == '':
@@ -75,6 +70,13 @@ class Command_Table(Top_Grammar):
                 elif self.mode == 'run_while':
                     if re.search(self.condition, self.FI.s) is None:
                         break
+
+                for cmd in self.commands:
+                    row = cmd.execute()
+                    if row:
+                        table.append(row)
+
+
         except StopIteration:
             pass
         if len(table)>0:

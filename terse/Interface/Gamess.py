@@ -66,7 +66,7 @@ class Gamess(Top):
         b = dict(zip(basis_words, vals))
 
         def polarf(plr, suffix):
-            if plr in ('0', ''):
+            if plr.strip() in ('0', ''):
                 return ''
             if plr == '1':
                 return suffix
@@ -81,14 +81,17 @@ class Gamess(Top):
             basis += 'G'
 
             polar_heavy = polarf(b['ndfunc'], 'd') + polarf(b['nffunc'], 'f')
+            polar_H = polarf(b['npfunc'], 'p')
             if polar_heavy:
-                polar_H = polarf(b['npfunc'], 'p')
                 if polar_H:
                     polar = '(%s,%s)' % (polar_heavy, polar_H)
                 else:
                     polar = '(%s)' % polar_heavy
             else:
-                polar = ''
+                if polar_H:
+                    polar = '(-,%s)' % polar_H
+                else:
+                    polar = ''
 
             basis += polar
             self.G_parsed.conditionally_add(old_key='P_basis', new_key='P_basis', new_value=basis)

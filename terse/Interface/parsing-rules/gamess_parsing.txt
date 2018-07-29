@@ -38,7 +38,9 @@ if [0]'     LONG RANGE CORRECTION= T':
 endif
 
 if [0]' PP    =':
-    additional_method = 'ECP'
+    if /^(?! PP    =NONE)/:
+        additional_method = 'ECP'
+    endif
 endif
     
 if [0]'          COMPOSITE METHOD ACCESSED:':
@@ -51,6 +53,14 @@ endif
 
 if [0]' DETERMINANTAL MULTIREFERENCE 2ND ORDER PERTURBATION THEORY (MRPT2)':
     scftyp = 'MRPT2'
+endif
+
+if [0]' MULTIREFERENCE PERTURBATION THEORY CONTROL':
+    scftyp = 'MRPT2'
+endif
+
+if [0]' RHF RI-MP2 ENERGY CALCULATION':
+    additional_method = 'RI'
 endif
 
 if [0]' NDFTB  =':
@@ -71,7 +81,12 @@ if [0]'     NDFUNC=':
 endif
 
 if [0]'     NPFUNC=':
-    npfunc,diffs,basnam=/^     NPFUNC=\s*(\S+)\s+DIFFS=\s*(\S+)\s+BASNAM=\s*(\S+)/
+    if /BASNAM=\s*(\S+)/:
+        npfunc,diffs,basnam=/^     NPFUNC=\s*(\S+)\s+DIFFS=\s*(\S+)\s+BASNAM=\s*(\S+)/
+    endif
+    if /BASNAM=\s*$/:
+        npfunc,diffs=/^     NPFUNC=\s*(\S+)\s+DIFFS=\s*(\S+)/
+    endif
 endif
 
 # external file
@@ -203,6 +218,11 @@ if [0]'          LAGRANGIAN CONVERGED':
     scf_done = 'True'
 endif
 
+if [0]'          DIIS CONVERGED':
+    scf_done = 'True'
+endif
+    
+
 # FMO unconverged
 if [18]'energies diverged!!! The total properties are not meaningful':
     scf_notconv = 'True'
@@ -260,16 +280,25 @@ if [0]' BEGINNING GEOMETRY SEARCH POINT NSERCH=':
     new_step = /^ BEGINNING GEOMETRY SEARCH POINT NSERCH=\s*(\S+)/
 endif
 
+# AMP4 / GS2 / RK4
+if [0]' JUMPING OFF SADDLE POINT ALONG THE IMAGINARY NORMAL MODE...':
+    new_irc = 'True'
+endif
+
+# GS2
 if [0]' *** TO FIND THE NEXT REACTION PATH POINT ****':
     new_irc = 'True'
 endif
 
-if [0]'          AT PATH DISTANCE STOTAL =':
-    irc_coord = /          AT PATH DISTANCE STOTAL =\s*(\S+)/
-    safejump(1)
-    irc_energy = /          TOTAL ENERGY            =\s*(\S+)/
+# AMPC4 / RK4
+if [0]' *** JUMPING TO POINT QC VIA A':
+    new_irc = 'True'
 endif
 
+# AMPC4 / GS2
+if [0]'        STOTAL=':
+    irc_coord = /        STOTAL=\s*(\S+)/
+endif
 
 # Skip them
 if [0]'          EIGENVECTORS':
@@ -320,6 +349,15 @@ if [0]' ATOM      ATOMIC                      COORDINATES (BOHR)':
     endtable
 endif
 
+# GLOBOP
+if [0]'  COORDINATES OF FINAL GEOMETRY (ANGS)':
+    is_geom_ang = 'True'
+    safejump(2)
+    table(geom,run_while=/\s+-?\d*\.\d+\s+-?\d*\.\d+\s+-?\d*\.\d+/):
+        row = field(2-5)
+        safejump(1)
+    endtable
+endif
 
 if [0]'     THERMOCHEMISTRY AT T=':
     thermo_temp = /^     THERMOCHEMISTRY AT T=\s+(\S+)/
@@ -336,7 +374,7 @@ endif
 
 #        FREQUENCY:        87.00 I     87.00 I     42.24       42.24        0.36
 if [0]'       FREQUENCY:':
-    table(freqs_horizontal,run_until=(0)):
+    table(freqs_horizontal,run_until=/./):
         row = characters([22-30],[34-42],[46-54],[58-66],[70-78])
     endtable
     safejump /^$/
@@ -357,7 +395,7 @@ endif
 if [0]'  MODE FREQ(CM**-1)  SYMMETRY  RED. MASS  IR INTENS':
     safejump(1)
     table(freqs,run_until=//):
-        row = field(2,5)
+        row = characters([8-18],[41-51])
         safejump(1)
     endtable
 endif

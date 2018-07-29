@@ -17,6 +17,7 @@ gbasis=AM1 -> wftype=AM1
 gbasis=PM3 -> wftype=PM3
 gbasis=RM1 -> wftype=RM1
 
+scftyp=MRPT2 -> wftype=MRPT2
 lcdftb=True -> wftype='LC-DFTB2 (or 3)'
 
 last_value(composite) -> end_composite

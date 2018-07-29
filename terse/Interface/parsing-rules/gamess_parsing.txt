@@ -74,7 +74,7 @@ if [0]' NDFTB  =':
 endif
 
 if [0]' - TURN ON A PRELIMINARY VERSION OF LONG-RANGE CORRECTED DFTB':
-    lcdftb = 'True'
+    additional_method = 'LC-DFTB'
 endif
 
 # basis set

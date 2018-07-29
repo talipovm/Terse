@@ -16,6 +16,7 @@ class Opt(Top_ReportGenerator):
         self.opt_ok = (self.parsed.last_value('P_opt_ok')=='True')
         self.do_opt_progress = self.settings.FullGeomInfo or not self.opt_ok
         self.n_steps = self.parsed.last_value('P_opt_iter')
+        self.measure_bonds = self.parsed.last_value('P_bond_constraints')
 
         if self.do_opt_progress:
             self.prepare_opt_convergence()
@@ -53,6 +54,10 @@ class Opt(Top_ReportGenerator):
     def opt_steps(self):
         return "Steps: %s" % self.n_steps
 
+    def measurements(self):
+        out = ['measure %s %s' % tuple(m) for m in self.measure_bonds]
+        return "; ".join(out)
+
     def save_geom(self):
         v = [str(Geom(self.we,g)) for g in self.parsed_g]
         self.multiple_geoms = (len(v) > 1)
@@ -69,6 +74,7 @@ class Opt(Top_ReportGenerator):
         cmd = [
             self.we.jmol_load_file(webpath),
             'frame last',
+            self.measurements(),
             self.we.jmol_text(label)
             ]
         return "; ".join(cmd)

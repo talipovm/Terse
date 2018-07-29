@@ -102,12 +102,16 @@ class ParsedContainer(Top):
                     z = ParsedElement(key=new_key, data=new_data)
                     self.data.insert(i+1,z)
 
-    def edit_nonempty_rec(self, old_key=None, new_key=None):
+    def edit_nonempty_rec(self, old_key=None, new_key=None, new_value=None):
         if not self.data:
             return
         for (i,d) in enumerate(self.data):
             if d.key==old_key and d.data != 'empty':
-                z = ParsedElement(key=new_key, data=deepcopy(d.data))
+                if new_value is not None:
+                    new_data = new_value
+                else:
+                    new_data = deepcopy(d.data)
+                z = ParsedElement(key=new_key, data=new_data)
                 self.data.insert(i+1,z)
 
     def to_empty(self, old_key=None, new_key=None):

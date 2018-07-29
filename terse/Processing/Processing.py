@@ -40,7 +40,13 @@ class Processing(Top):
         if s_re is None:
             raise SyntaxError
         old_key, new_key = s_re.groups()
-        self.parsed.edit_nonempty_rec(old_key=old_key, new_key=new_key)
+
+        new_value = None
+        if '=' in new_key:
+            new_key, new_value = strip_all(new_key.split('='))
+            new_value = unquote_if_quoted(new_value)
+
+        self.parsed.edit_nonempty_rec(old_key=old_key, new_key=new_key,new_value=new_value)
 
     def command_joinunique(self, s):
         s_re = re.search(r'join_unique\((.*)\)\s*->\s*(\S.*\S)\s*', s)

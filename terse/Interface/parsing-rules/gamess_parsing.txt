@@ -455,6 +455,13 @@ if [0]'   TIME     MODE     Q              P     KINETIC      POTENTIAL         
     endtable
 endif
 
+if [0]'          HARMONICALLY CONSTRAINED BOND LENGTHS':
+    safejump(1)
+    table(bond_constraints,run_while=/I=/):
+        row = field(2,4)
+        safejump(1)
+    endtable
+endif
 
 
 if [0]' EXECUTION OF GAMESS TERMINATED NORMALLY':

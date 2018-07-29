@@ -194,6 +194,7 @@ geom -> P_geom
 max_force -> P_max_force
 rms_force -> P_rms_force
 
+nonempty(bond_constraints) -> warnings='Bond constraint(s)'
 join_unique(warnings) -> P_warnings
 
 vibrations -> P_vibrations # vibration vectors
@@ -208,6 +209,8 @@ thermo_units -> P_thermo_units
 
 drc_time -> P_drc_time
 drc_poten -> P_drc_poten
+
+bond_constraints -> P_bond_constraints
 
 term_ok -> P_term_ok
 

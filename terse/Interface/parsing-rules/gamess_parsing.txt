@@ -276,6 +276,35 @@ if [18]'energies diverged!!! The total properties are not meaningful':
     scf_notconv = 'True'
 endif
     
+# Energy in solvent
+# PCM
+if [0]' TOTAL FREE ENERGY IN SOLVENT                        =':
+    solvent_energy = /=\s*(\S+)/
+endif
+
+# FMO/PCM
+if [0]'     Free uncorr energy in solvent=':
+    solvent_energy = /=\s*(\S+)/
+endif
+
+# SVLME
+if [0]' TOTAL SVPE FREE ENERGY        GSVPE =':
+    solvent_energy = /=\s*(\S+)/
+endif
+    
+# SVPE
+if [0]' EINT  +    SVPE    G  IN  SOLUTION':
+    solvent_energy = /SOLUTION\s*(\S+)/
+endif
+
+# SS(V)PE
+if [0]' EINT  +  SS(V)PE   G  IN  SOLUTION':
+    solvent_energy = /SOLUTION\s*(\S+)/
+endif
+if [0]' EINT + SS(V)PE  + DEFESR G IN SOLUTION':
+    solvent_energy = /SOLUTION\s*(\S+)/
+endif
+
 # FMO2 energy
 if [0]' Total energy of the molecule: Euncorr(2)':
     fmo2_energy = /Total energy of the molecule: Euncorr\(2\)=\s*(\S+)/

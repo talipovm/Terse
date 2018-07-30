@@ -216,6 +216,8 @@ composite_energy_T -> P_composite_energy_T
 composite_enthalpy -> P_composite_enthalpy
 composite_free_energy -> P_composite_free_energy
 
+solvent_energy -> P_solvent_energy
+
 S2 -> P_S2
 separate_columns(charges_mull_low) -> P_charges_Mulliken,P_charges_Lowdin
 

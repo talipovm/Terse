@@ -41,4 +41,5 @@ class GlobalCommand_If(Top_Grammar):
 
     def execute(self):
         for cmd in self.commands:
+            # print(self.FI.s.rstrip())
             cmd.execute()

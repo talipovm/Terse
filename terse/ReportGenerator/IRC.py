@@ -24,7 +24,7 @@ class IRC(Top_ReportGenerator):
     def prepare_irc_convergence(self):
 
         self.irc_x = [0] + [o.last_value('P_irc_coord') for o in self.parsed.data[1:]]
-        self.irc_e = [o.last_value('P_scf_e') for o in self.parsed.data]
+        self.irc_e = [o.last_value('P_final_energy') for o in self.parsed.data]
 
         if len(self.irc_x)!=len(self.irc_e):
             self.plot_irc = False

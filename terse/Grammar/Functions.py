@@ -25,7 +25,7 @@ class ExpressionFactory(Top_Grammar):
         elif re.search(r'\[\S+\]\'.*\'', s_GI):
             self.PtnClass = Expression_positional
         else:
-            raise SyntaxError
+            raise SyntaxError(s_GI)
 
     def assign(self):
         return self.PtnClass(self.s_GI,self.f_get_params)

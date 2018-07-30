@@ -9,6 +9,7 @@ from ReportGenerator.Opt import Opt
 from ReportGenerator.NoJobType import NoJobType
 from ReportGenerator.SinglePoint import SinglePoint
 from ReportGenerator.Top_ReportGenerator import Top_ReportGenerator
+import re
 
 class Job(Top_ReportGenerator):
 
@@ -88,6 +89,46 @@ class Job(Top_ReportGenerator):
         except TypeError:
             return "Total Energy %s\n" % self.color_tag('N/A','err')
 
+    def composite_energy_html(self):
+        e0 = self.parsed.last_value('P_composite_energy_0')
+        eT = self.parsed.last_value('P_composite_energy_T')
+        H = self.parsed.last_value('P_composite_enthalpy')
+        G = self.parsed.last_value('P_composite_free_energy')
+        if e0 is None:
+            return 'No E(0K) available'
+        names = ('E(0K)','E(T)','H','G')
+        s = self.br_tag.join('%s= %s'%v for v in zip(names,(e0,eT,H,G)))
+        return self.strong_tag('Composite Method Energies') + self.br_tag + s
+
+    def energy_html(self):
+        out = [self.strong_tag('Last Energy Values:')]
+        energy_names = self.parsed.find_keys(r'P_.*_energy$')
+        if energy_names is None:
+            return
+
+        unique_names = list()
+        [unique_names.append(x) for x in energy_names if x not in unique_names]
+
+        if 'P_composite_free_energy' in unique_names:
+            return self.composite_energy_html()
+        for key in unique_names:
+            val = self.parsed.last_value(key)
+            s = re.search(r'P_(.*)_energy',key).group(1)
+            # format parentheses
+            sre = re.search(r'(.*)(_p)(.)(p)',s)
+            if sre:
+                s = '%s(%s)' % (sre.group(1),sre.group(3))
+            # format brackets
+            sre = re.search(r'(.*)(_b)(.*)(b)',s)
+            if sre:
+                s = '%s[%s]' % (sre.group(1),sre.group(3))
+            en_type = self.parsed.last_value(key+'_type')
+            if en_type is not None:
+                s += '(%s)' % en_type
+            s_en = '%s: %s' % (s.replace('_','-').upper(),val)
+            out.append(s_en)
+        return self.br_tag.join(out)
+
     def scf_failed_html(self):
         if self.parsed.last_value('P_scf_notconv')== 'True':
             return self.color_tag('SCF did not converge!', 'err')
@@ -133,9 +174,10 @@ class Job(Top_ReportGenerator):
             self.open_shell_html(),
             self.symmetry_html(),
             self.charge_mult_html(),
-            self.scf_energy_html(),
             self.scf_failed_html(),
-            self.coupled_cluster_html(),
+            self.energy_html(),
+            # self.scf_energy_html(),
+            # self.coupled_cluster_html(),
             self.t1_diagnostics_html(),
             self.warnings()
         ]

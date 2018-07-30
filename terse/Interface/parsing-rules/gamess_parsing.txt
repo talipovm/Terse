@@ -37,6 +37,14 @@ if [0]'     LONG RANGE CORRECTION= T':
     additional_method = 'LC'
 endif
 
+if [0]' DIRECT DETERMINANT MULTIREFERENCE-AQCC':
+    additional_method = 'MR-AQCC'
+endif
+
+if [0]' DIRECT DETERMINANT SINGLE-REFERENCE-ACPF':
+    additional_method = 'ACPF'
+endif
+
 if [0]' PP    =':
     if /^ PP    =(?!NONE)/:
         additional_method = 'ECP'
@@ -63,6 +71,14 @@ endif
 
 if [0]' MULTIREFERENCE PERTURBATION THEORY CONTROL':
     scftyp = 'MRPT2'
+endif
+
+if [0]' ###   MCQDPT2 RESULTS   ###':
+    additional_method = 'MCQDPT2'
+endif
+
+if [0]' ###   MRMP2 RESULTS   ###':
+    additional_method = 'MRMP2'
 endif
 
 if [0]' RHF RI-MP2 ENERGY CALCULATION':
@@ -115,8 +131,14 @@ if [0]' NUMBER OF CARTESIAN GAUSSIAN BASIS FUNCTIONS =':
     nmos = /^ NUMBER OF CARTESIAN GAUSSIAN BASIS FUNCTIONS =\s*(\S+)/
 endif
 
+# For all-electron basis sets
 if [0]' NUMBER OF OCCUPIED ORBITALS (ALPHA)          =':
     nocc = /^ NUMBER OF OCCUPIED ORBITALS \(ALPHA\)          =\s*(\S+)/
+endif
+
+# For ECP
+if [0]' NUMBER OF OCCUPIED ORBITALS (ALPHA) KEPT IS    =':
+    nocc = /=\s*(\S+)/
 endif
 
 if [0]' TOTAL NUMBER OF MOS IN VARIATION SPACE=':
@@ -245,6 +267,9 @@ if [0]'          DIIS CONVERGED':
     scf_done = 'True'
 endif
     
+if [0]'          SQCDF CONVERGED':
+    scf_done = 'True'
+endif
 
 # FMO unconverged
 if [18]'energies diverged!!! The total properties are not meaningful':
@@ -253,7 +278,7 @@ endif
     
 # FMO2 energy
 if [0]' Total energy of the molecule: Euncorr(2)':
-    dftb_energy = /Total energy of the molecule: Euncorr\(2\)=\s*(\S+)/
+    fmo2_energy = /Total energy of the molecule: Euncorr\(2\)=\s*(\S+)/
     if /Euncorr\(2\)=\s*-/:
         scf_done = 'True'
     endif
@@ -270,16 +295,137 @@ if [0]'Total spin multiplicity:':
 endif
 
 
-if [0]'                       TOTAL ENERGY =':
-    SCF_energy = /^                       TOTAL ENERGY =\s+(\S+)/
-endif
-
+# printed after convergence
+# RHF, RO-HF, CUHF, DC-RHF
+# MCSCF, GVB
+# various DFT,SQM in the form {R,RO,CU,U}-XXX
+# also could be FINAL MINIMUM ENERGY FROM GLOBOP
 if [0]' FINAL':
-    SCF_energy = /^ FINAL.*ENERGY IS\s+(\S+)/
+    final_energy_type,final_energy = /^ FINAL\s+(\S+)\s+ENERGY IS\s+(\S+)/
 endif
 
+# printed after FINAL .* ENERGY for:
+# DFT, {R,RO,U}HF, DFTB, MP2
+# MCSCF,GUGA,ALDET
+# cityp=CIS,SFCIS,FSOCI,GENCI,ORMAS # might print out excited state energies!
+#         check the line /^     ORMAS CI PROPERTIES...FOR THE WAVEFUNCTION OF STATE    1/
+# cctyp=CCSD
+#
+# regular case
+if [0]'     PROPERTY VALUES FOR THE':
+    total_energy_type = /PROPERTY VALUES FOR THE\s*(\S+)/
+endif
+# DFT
+if [0]'     PROPERTIES FOR THE':
+    total_energy_type = /PROPERTIES FOR THE\s*(\S+)/
+endif
+# MP2
+if [0]'     MP2 PROPERTIES...FOR THE FIRST ORDER WAVEFUNCTION':
+    total_energy_type = 'MP2'
+endif
+# CI
+if [0]'     CIS   PROPERTIES...FOR THE WAVEFUNCTION OF EXCITED STATE':
+    total_energy_type = 'CI*'
+endif
+# SFCIS-excited
+if [0]'     SFCIS PROPERTIES...FOR THE WAVEFUNCTION OF EXCITED STATE':
+    total_energy_type = 'CI*'
+endif
+# SFCIS
+if [0]'     FSOCI CI PROPERTIES...FOR THE WAVEFUNCTION OF STATE    1':
+    total_energy_type = 'CI'
+endif
+# GENCI
+if [0]'     GENCI CI PROPERTIES...FOR THE WAVEFUNCTION OF STATE    1':
+    total_energy_type = 'CI'
+endif
+# GUGA
+if [0]'     GUGA  CI PROPERTIES...FOR THE WAVEFUNCTION OF STATE    1':
+    total_energy_type = 'CI'
+endif
+# ALDET
+if [0]'     ALDET CI PROPERTIES...FOR THE WAVEFUNCTION OF STATE    1':
+    total_energy_type = 'CI'
+endif
+# ORMAS
+if [0]'     ORMAS CI PROPERTIES...FOR THE WAVEFUNCTION OF STATE    1':
+    total_energy_type = 'CI'
+endif
+
+if [0]'                       TOTAL ENERGY =':
+    total_energy = /^                       TOTAL ENERGY =\s+(\S+)/
+endif
+# but not by EOM-CCSD or CR-CC or CIM programs or MP2 calculated with IMS!
+# not printed for SQM
+
+
+# ground state SF-CIS
+# From cis-sf-rohf.gms:
+# SELECTING EXCITED STATE IROOT=   1 AT E=     -273.9030207751
+# AS THE STATE OF INTERES
+if [0]' SELECTING EXCITED STATE IROOT=   1 AT E=':
+    ci_energy = /E=\s*(\S+)/
+endif
+
+# ground-state FSOCI
+# From fsoci-bn.gms
+# CONVERGED STATE    1 ENERGY=      -79.0878520228 IN   17 ITERS
+#
+# Similar format for ground-state CI:
+# From cis-c6h4.gms
+# CONVERGED STATE    1 ENERGY=     -229.4297489764
+if [0]' CONVERGED STATE    1 ENERGY=':
+    ci_energy = /ENERGY=\s*(\S+)/
+endif
+
+# ground-state GENCI, the same format for ALDET and ORMAS
+# From genci-c2.gms:
+# STATE   1  ENERGY=       -75.5352008161  S=  0.00  SZ=  0.00  SPACE SYM=AG
+if [0]' STATE   1  ENERGY=':
+    ci_energy = /ENERGY=\s*(\S+)/
+endif
+
+# ground-state GUGA
+# From guga-hcn-grad.gms
+# STATE #    1  ENERGY =     -93.108907356
+if [0]' STATE #    1  ENERGY =':
+    ci_energy = /ENERGY =\s*(\S+)/
+endif
+
+# EOM-CC program
+if [0]'          CCSD ENERGY:':
+    ccsd_energy = /^          CCSD ENERGY:\s*(\S+)/
+endif
+# excitation energies could be extracted from EOM-CC from the table (to be implemented):
+# and in table /^                   ---- SUMMARY OF EOM-CCSD CALCULATIONS ----/
+#                   ---- SUMMARY OF EOM-CCSD CALCULATIONS ----
+#            SPIN    EXCITATION     EXCITATION     TOTAL
+#    SYMM    MULT    ENERGY (H)     ENERGY (EV)    ENERGY (H)     ITERATIONS
+#     A       3      0.21624552        5.884    -283.02715293     CONVERGED
+#     A       3      0.18672191        5.081    -283.05667654     CONVERGED
+#     A       1      0.19916031        5.419    -283.04423814     CONVERGED
+
+
+# Energies printout by cctyp=CR-CC program (taken from cc-crcc-hf.gms):
+#        MBPT(2) ENERGY:     -100.1790287466   CORR.E=  -0.5495270959
+#        CCSD    ENERGY:     -100.0945369867   CORR.E=  -0.4650353359
+#        CCSD[T] ENERGY:     -100.2163933044   CORR.E=  -0.5868916537
+#        CCSD(T) ENERGY:     -100.2022905382   CORR.E=  -0.5727888875
+#      R-CCSD[T] ENERGY:     -100.1485872690   CORR.E=  -0.5190856183
+#      R-CCSD(T) ENERGY:     -100.1421901712   CORR.E=  -0.5126885205
+#     CR-CCSD[T] ENERGY:     -100.1234072864   CORR.E=  -0.4939056357
+#     CR-CCSD(T) ENERGY:     -100.1269783526   CORR.E=  -0.4974767019
+#
+# extra lines for cctyp=CR-CC(Q)
+#    CCSD(TQ),B  ENERGY:     -199.0988047379   CORR.E=  -0.4131343622
+# R1-CCSD(TQ),A  ENERGY:     -199.0977932137   CORR.E=  -0.4121228380
+# R1-CCSD(TQ),B  ENERGY:     -199.0977567010   CORR.E=  -0.4120863253
+# R2-CCSD(TQ),A  ENERGY:     -199.0979737182   CORR.E=  -0.4123033426
+# R2-CCSD(TQ),B  ENERGY:     -199.0979071508   CORR.E=  -0.4122367751
+# CR-CCSD(TQ),A  ENERGY:     -199.0977723179   CORR.E=  -0.4121019422
+# CR-CCSD(TQ),B  ENERGY:     -199.0977198601   CORR.E=  -0.4120494844
 if [0]'        MBPT(2) ENERGY:':
-    mbpt2_energy    = /MBPT\(2\) ENERGY:\s+(\S+)/
+    mp2_energy    = /MBPT\(2\) ENERGY:\s+(\S+)/
 endif
 
 if [0]'        CCSD    ENERGY:':
@@ -291,13 +437,149 @@ if [0]'        CCSD[T] ENERGY:':
 endif
 
 if [0]'        CCSD(T) ENERGY:':
-ccsd_pTp_energy = /CCSD\(T\) ENERGY:\s+(\S+)/
+    ccsd_pTp_energy = /CCSD\(T\) ENERGY:\s+(\S+)/
+endif
+
+if [0]'      R-CCSD[T] ENERGY:':
+    r_ccsd_bTb_energy = /CCSD\[T\] ENERGY:\s+(\S+)/
+endif
+
+if [0]'      R-CCSD(T) ENERGY:':
+    r_ccsd_pTp_energy = /CCSD\(T\) ENERGY:\s+(\S+)/
+endif
+
+if [0]'     CR-CCSD[T] ENERGY:':
+    cr_ccsd_bTb_energy = /CCSD\[T\] ENERGY:\s+(\S+)/
+endif
+
+if [0]'     CR-CCSD(T) ENERGY:':
+    cr_ccsd_pTp_energy = /CCSD\(T\) ENERGY:\s+(\S+)/
+endif
+
+if [0]' CR-CCSD(TQ),B  ENERGY:':
+    cr_cc_pQp_energy = /ENERGY:\s+(\S+)/
+endif
+
+# cctyp=CR-CCL
+# CCSD                       ENERGY:     -198.9608396486   CORR.E=  -0.2531476447
+# CR-CC(2,3),A OR CCSD(2)_T  ENERGY:     -198.9657353073   CORR.E=  -0.2580433035
+# CR-CC(2,3) OR CR-CCSD(T)_L ENERGY:     -198.9670302186   CORR.E=  -0.2593382148
+if [0]' CCSD                       ENERGY:':
+    ccsd_energy = /ENERGY:\s+(\S+)/
+endif
+
+if [0]' CR-CC(2,3) OR CR-CCSD(T)_L ENERGY:':
+    cr_ccl_energy = /ENERGY:\s+(\S+)/
+endif
+if [0]' CR-CC(2,3) OR CR-CCSD(T)_L E=':
+    cr_ccl_energy = /E=\s+(\S+)/
+endif
+
+# cimtyp=secim
+# -----------------------
+#  Summary of CIM Energy
+# -----------------------
+# E_RHF            =     -760.251760
+# E_CIM-SCS-MP2    =     -762.105225  for all of   40 MOs,  E(CORR) =   -1.853466
+# E_CIM-MP2        =     -762.157465  for all of   40 MOs,  E(CORR) =   -1.905705
+
+if [0]' E_CIM-SCS-MP2    =':
+    scs_mp2_energy = / E_CIM-SCS-MP2    =\s*(\S+)/
+endif
+
+if [0]' E_CIM-MP2        =':
+    additional_method='Clusters in molecules'
+    mp2_energy = / E_CIM-MP2        =\s*(\S+)/
 endif
 
 if [0]' T1 DIAGNOSTIC        =':
     T1_diagnostic = /T1 DIAGNOSTIC        =\s+(\S+)/
 endif
 
+# *** MCQDPT2 ENERGIES ***
+#   STATE                       1ST ORDER                       2ND ORDER
+#     1     E(MCSCF)=     -154.9786589611     E(MP2)=     -155.4865538101
+if [0]' *** MCQDPT2 ENERGIES ***':
+    safejump(2)
+    mcscf_energy,mcqdpt2_energy = /=\s+(\S+)\s+.*=\s+(\S+)/
+endif
+
+# *** MRMP2 ENERGY ***
+#   STATE                       1ST ORDER                       2ND ORDER
+#     1     E(MCSCF)=     -402.3500604286     E(MP2)=     -402.6930218082
+if [0]' *** MRMP2 ENERGY ***':
+    safejump(2)
+    mcscf_energy,mrmp2_energy = /=\s+(\S+)\s+.*=\s+(\S+)/
+endif
+
+
+### output from $comp rmethd=g32ccsd $end
+#    ----------------------------------------------------------------
+#                   SUMMARY OF G3(MP2) CALCULATIONS
+#    ----------------------------------------------------------------
+#    MP2/6-31G(D)    =    -7.995959   CCSD(T)/6-31G(D) =    -8.002922
+#    MP2/G3MP2LARGE  =    -8.011763   BASIS CONTRIBUT  =    -0.015804
+#    ZPE(HF/6-31G(D))=     0.002881   ZPE SCALE FACTOR =     0.892900
+#    HLC             =    -0.009170   FREE ENERGY      =    -0.012891
+#    THERMAL ENERGY  =     0.005594   THERMAL ENTHALPY =     0.006538
+#    ----------------------------------------------------------------
+#    E(G3(MP2)) @ 0K =    -8.025015   E(G3(MP2)) @298K =    -8.022648
+#    H(G3(MP2))      =    -8.021704   G(G3(MP2))       =    -8.041132
+#    ----------------------------------------------------------------
+if [0]'    E(G3(MP2)) @ 0K =':
+    composite_energy_0,composite_energy_T = /=\s*(\S+)\s+.*=\s*(\S+)/
+    composite_enthalpy,composite_free_energy = /=\s*(\S+)\s+.*=\s*(\S+)/
+endif
+
+#
+# OR
+#    COMPOSITE ENERGY @ 0K   =      -8.025015
+#    COMPOSITE ENERGY @ 298K =      -8.022648
+#    COMPOSITE ENTHALPY      =      -8.021704
+#    COMPOSITE FREE ENERGY   =      -8.041132
+if [0]'    COMPOSITE ENERGY @ 0K   =':
+    composite_energy_0 = /=\s*(\S+)/
+    safejump(1)
+    composite_energy_T = /=\s*(\S+)/
+    safejump(1)
+    composite_enthalpy = /=\s*(\S+)/
+    safejump(1)
+    composite_free_energy = /=\s*(\S+)/
+endif
+
+# regular $mp2
+if [0]'                     E(MP2)=':
+    mp2_energy = /=\s*(\S+)/
+endif
+
+# $mp2 code=ims $end
+# RESULTS OF MOLLER-PLESSET 2ND ORDER CORRECTION ARE
+#               E(0)=      -108.9891349069
+#               E(1)=         0.0
+#               E(2)=        -0.4180606588
+#             E(MP2)=      -109.4071955657
+# SPIN-COMPONENT-SCALED MP2 RESULTS ARE
+#              E(2S)=        -0.3160498362
+#              E(2T)=        -0.1020108226
+#             E(2ST)=        -0.4132634110 = 6/5 * E(2S) + 1/3 * E(2T)
+#            SCS-MP2=      -109.4023983179
+# also works for ospt=rmp
+if [0]'             E(MP2)=':
+    mp2_energy = /=\s*(\S+)/
+endif
+if [0]'            SCS-MP2=':
+    scs_mp2_energy = /SCS-MP2=\s*(\S+)/
+endif
+
+# ZAPT $MP2 ospt=ZAPT $END
+if [0]'           E(MP2)  =':
+    mp2_energy = /=\s*(\S+)/
+endif
+
+# MRPT2
+if [0]' TOTAL MRPT2':
+    mrpt2_energy = /2ND ORDER ENERGY =\s*(\S+)/
+endif
 
 if [0]' BEGINNING GEOMETRY SEARCH POINT NSERCH=':
     new_step = /^ BEGINNING GEOMETRY SEARCH POINT NSERCH=\s*(\S+)/

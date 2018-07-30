@@ -87,6 +87,7 @@ class Grammar(Top_Grammar):
 
     def parse(self):
         for s_FI in self.FI:
+            # print(s_FI.rstrip())
             p = self.find(s_FI)
             if p is not None:
                 p.execute()

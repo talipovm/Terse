@@ -1,6 +1,7 @@
 from Top import Top
 from copy import deepcopy
 import collections
+import re
 
 import logging
 log = logging.getLogger(__name__)
@@ -51,6 +52,14 @@ class ParsedContainer(Top):
 
     def get_item(self, key):
         return [i for i in self.flatten() if i.key==key]
+
+    def find_items(self,pattern):
+        sre = re.compile(pattern)
+        return [i for i in self.flatten() if sre.search(i.key)]
+
+    def find_keys(self,pattern):
+        sre = re.compile(pattern)
+        return [i.key for i in self.flatten() if sre.search(i.key)]
 
     def get_value(self, key):
         return [i.data for i in self.flatten() if i.key==key]

@@ -18,7 +18,7 @@ gbasis=PM3 -> wftype=PM3
 gbasis=RM1 -> wftype=RM1
 
 scftyp=MRPT2 -> wftype=MRPT2
-lcdftb=True -> wftype='LC-DFTB2 (or 3)'
+# lcdftb=True -> wftype='LC-DFTB2 (or 3)'
 
 last_value(composite) -> end_composite
 nonempty(end_composite) -> gbasis
@@ -112,9 +112,10 @@ gbasis=ACC6WC -> gbasis='aug-cc-pwCV6Z'
 ### ENERGY ###
 ##############
 
-gbasis=DFTB -> SCF_energy=empty
-dftb_energy -> final_SCF_energy
-nonempty(SCF_energy) -> final_SCF_energy
+#gbasis=DFTB -> total_energy=empty
+#dftb_energy -> final_SCF_energy # DFTB energy first
+
+#nonempty(total_energy) -> final_SCF_energy # overwrite with SCF energy if available
 
 
 ################
@@ -132,8 +133,10 @@ nonempty(geom_bohr) -> geom            # if geometry in Bohrs was not ignored, u
 runtyp=ENERGY -> JobType=sp
 tddft=True -> excitation='TD-DFT'
 runtyp=OPTIMIZE -> JobType=opt
+
 runtyp=SADPOINT -> JobType=opt
 runtyp=SADPOINT -> additional_method=TS
+
 runtyp=HESSIAN -> JobType=freq
 hssend=T -> JobType=freq
 runtyp=IRC -> JobType=irc
@@ -176,10 +179,46 @@ join_unique(additional_method) -> P_additional_method
 
 final_SCF_energy -> P_scf_e
 
+fmo2_energy -> P_fmo2_energy
+
+final_energy -> P_final_energy
+final_energy_type -> P_final_energy_type
+
+total_energy -> P_total_energy
+total_energy_type -> P_total_energy_type
+
+mp2_energy -> P_mp2_energy
+scs_mp2_energy -> P_scs_mp2_energy
+ci_energy -> P_ci_energy
+
+ccsd_energy -> P_ccsd_energy
+
+ccsd_bTb_energy -> P_ccsd_bTb_energy
+ccsd_pTp_energy -> P_ccsd_pTp_energy
+
+r_ccsd_bTb_energy -> P_r_ccsd_bTb_energy
+r_ccsd_pTp_energy -> P_r_ccsd_pTp_energy
+
+cr_ccsd_bTb_energy -> P_cr_ccsd_bTb_energy
+cr_ccsd_pTp_energy -> P_cr_ccsd_pTp_energy
+
+cr_cc_pQp_energy -> P_cr_cc_pQp_energy
+cr_ccl_energy -> P_cr_ccl_energy
+
+mrpt2_energy -> P_mrpt2_energy
+
+mcscf_energy -> P_mcscf_energy
+mcqdpt2_energy -> P_mcqdpt2_energy
+mrmp2_energy -> P_mrmp2_energy
+
+composite_energy_0 -> P_composite_energy_0
+composite_energy_T -> P_composite_energy_T
+composite_enthalpy -> P_composite_enthalpy
+composite_free_energy -> P_composite_free_energy
+
 S2 -> P_S2
 separate_columns(charges_mull_low) -> P_charges_Mulliken,P_charges_Lowdin
 
-ccsd_pTp_energy -> P_ccsd_pTp_energy
 T1_diagnostic -> P_T1_diagnostic
 
 last_value(start_skip_freq) -> P_start_skip_freq
